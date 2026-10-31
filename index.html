@@ -220,8 +220,6 @@ select option:checked{background:var(--acc);color:#000}
 .calc .gt{font-size:13px;color:var(--ink);padding-top:3px;border-top:1px solid var(--line)}
 .calc .gt b{font-size:16px;font-weight:700}
 .calc input{background:var(--panel)}
-.calc .pt b{color:var(--acc)}
-.chip.m2{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc);border-color:transparent}
 input[readonly]{background:var(--hover)}
 
 /* auth */
@@ -303,7 +301,7 @@ input[readonly]{background:var(--hover)}
       <button type="button" class="btn addit" id="ia"><span data-ic="plus" data-s="14"></span>Tambah item</button>
       <div class="calc">
         <label>Biaya desain (Rp)<input name="design_fee" class="rp" inputmode="numeric" autocomplete="off" placeholder="0"></label>
-        <div class="tot"><span>Subtotal item <b id="isum">Rp 0</b></span><span id="iarea" hidden>Total luas <b>0 m²</b></span><span class="gt">Total<b id="itot">Rp 0</b></span><span id="im2" class="pt" hidden>Poin per 1 m² <b>Rp 0/m²</b></span></div>
+        <div class="tot"><span>Subtotal item <b id="isum">Rp 0</b></span><span id="iarea" hidden>Total luas <b>0 m²</b></span><span class="gt">Total<b id="itot">Rp 0</b></span></div>
       </div>
     </section>
     <section class="sec">
@@ -493,7 +491,7 @@ function vBoard() {
     const items = list.filter(p => p.status === k).sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
     return `<div class="col" data-col="${k}" style="--c:var(${c})"><h3><i></i>${label}<em>${items.length}</em></h3>${items.map(p =>
       `<div class="card" draggable="true" data-open="${p.id}" tabindex="0"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
-       <div class="meta">${dlChip(p)}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}${m2Badge(p)}</div>
+       <div class="meta">${dlChip(p)}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
        ${p.tasks.length ? `<div class="bar2" style="--c:var(--acc)"><span style="width:${p.tasks.filter(t => t.done).length / p.tasks.length * 100}%"></span></div>` : ''}</div>`).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
   }).join('')}</div>`;
 }
@@ -503,7 +501,7 @@ function vProyek() {
     .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   return `<div class="tools"><select id="fs" aria-label="Filter tahap"><option value="">Semua tahap</option>${COLS.map(c => `<option value="${c[0]}" ${fs === c[0] ? 'selected' : ''}>${c[1]}</option>`).join('')}</select></div>
   <div class="panel tbl"><table><thead><tr><th>Proyek</th><th>Tahap</th><th>Deadline</th><th>Checklist</th><th class="n">Nilai</th></tr></thead><tbody>${list.map(p =>
-    `<tr data-open="${p.id}" tabindex="0"><td><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></td><td>${badge(p)}</td><td>${dlChip(p) || '-'}</td><td>${taskInfo(p)}</td><td class="n">${rp(p.value)}${perM2(p) ? `<small>${m2Badge(p)}</small>` : ''}</td></tr>`).join('')
+    `<tr data-open="${p.id}" tabindex="0"><td><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></td><td>${badge(p)}</td><td>${dlChip(p) || '-'}</td><td>${taskInfo(p)}</td><td class="n">${rp(p.value)}</td></tr>`).join('')
     || '<tr><td colspan="5" class="empty">Belum ada proyek. Klik Proyek baru untuk memulai.</td></tr>'}</tbody></table></div>`;
 }
 
@@ -562,10 +560,6 @@ function renderSub() {
 // Item ukuran: (panjang cm x lebar cm / 10.000) = m2, dikali jumlah, dikali harga per m2. Item satuan: jumlah x harga.
 const itemSub = i => Math.round((i.mode === 'unit' ? 1 : (+i.w || 0) * (+i.h || 0) / 1e4) * (+i.qty || 0) * (+i.price || 0));
 const itemArea = i => (+i.w || 0) * (+i.h || 0) / 1e4;
-// poin nilai per 1 m2: nilai proyek (termasuk biaya desain) dibagi total luas semua item ukuran
-const projArea = p => (p.items || []).reduce((a, i) => a + (i.mode === 'unit' ? 0 : itemArea(i) * (+i.qty || 0)), 0);
-const perM2 = p => { const a = projArea(p); return a > 0 && p.value ? Math.round(p.value / a) : 0; };
-const m2Badge = p => perM2(p) ? `<span class="chip m2" title="Nilai proyek per 1 m² (${projArea(p).toLocaleString('id-ID')} m²)">${rp(perM2(p))}/m²</span>` : '';
 function totals() {
   const sum = cur.items.reduce((a, i) => a + itemSub(i), 0);
   const total = sum + num(f.design_fee.value);
@@ -576,8 +570,6 @@ function totals() {
   const area = cur.items.reduce((a, i) => a + (i.mode === 'unit' ? 0 : itemArea(i) * (+i.qty || 0)), 0);
   $('#iarea').hidden = !area;
   $('#iarea b').textContent = area.toLocaleString('id-ID') + ' m²';
-  $('#im2').hidden = !area || !total;
-  $('#im2 b').textContent = rp(Math.round(total / (area || 1))) + '/m²';
   sisa();
   return total;
 }
