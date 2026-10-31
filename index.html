@@ -257,8 +257,15 @@ select option:checked{background:var(--acc);color:#000}
 input[readonly]{background:var(--hover)}
 
 /* auth */
-#auth{max-width:340px;margin:12vh auto;padding:22px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
-#auth h1{font-size:17px}
+#auth{min-height:100vh;min-height:100dvh;display:grid;align-content:center;justify-items:center;gap:12px;padding:24px}
+#auth>*{width:min(320px,100%)}
+#auth .logo{width:52px;height:52px;border-radius:14px;background:var(--acc);color:#000;display:grid;place-items:center;margin-bottom:4px}
+#auth h1{font-size:22px;text-align:center}
+#auth .sub2{color:var(--mute);text-align:center;margin:-6px 0 8px}
+#auth #cfg{color:var(--red);font-size:12.5px;text-align:center}
+#auth input{padding:11px 12px;font-size:14px;border-radius:8px}
+#auth .btn{justify-content:center;padding:11px 12px;font-size:14px;border-radius:8px;margin-top:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 @media(min-width:861px){
   .side{width:60px;overflow:hidden;white-space:nowrap;transition:width .18s ease,box-shadow .18s;z-index:25;cursor:pointer}
@@ -298,11 +305,13 @@ input[readonly]{background:var(--hover)}
 <body>
 
 <form id="auth" hidden>
-  <h1>Masuk ke Meja Kerja</h1>
-  <p id="cfg" hidden style="color:var(--red);font-size:13px">Penyimpanan cloud belum dikonfigurasi. Atur Environment Variables CLOUD_URL dan CLOUD_KEY di Vercel, lalu deploy ulang.</p>
-  <label>Email<input id="em" type="email" required autocomplete="username"></label>
-  <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
-  <button class="btn primary" style="justify-content:center">Masuk</button>
+  <div class="logo"><span data-ic="palette" data-s="24"></span></div>
+  <h1>Meja Kerja</h1>
+  <p class="sub2">Masuk untuk melanjutkan</p>
+  <p id="cfg" hidden>Penyimpanan cloud belum dikonfigurasi. Atur Environment Variables CLOUD_URL dan CLOUD_KEY di Vercel, lalu deploy ulang.</p>
+  <label><span class="sr">Email</span><input id="em" type="email" required autocomplete="username" placeholder="Email"></label>
+  <label><span class="sr">Password</span><input id="pw" type="password" required autocomplete="current-password" placeholder="Password"></label>
+  <button class="btn primary">Masuk</button>
 </form>
 
 <div class="shell" id="app" hidden>
