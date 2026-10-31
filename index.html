@@ -64,7 +64,7 @@ svg{flex:none;display:block}
 #view{padding:16px 20px 32px}
 
 /* generic */
-.grid2{display:grid;grid-template-columns:3fr 2fr;gap:12px}
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:12px;align-items:start}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
 .panel h2{font-size:13px;font-weight:700;margin-bottom:8px}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
@@ -80,12 +80,16 @@ svg{flex:none;display:block}
 .chip.late{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red);border-color:transparent}
 .bar2{height:5px;background:var(--line);border-radius:5px;overflow:hidden}
 .bar2 span{display:block;height:100%;background:var(--c,var(--acc));border-radius:5px}
-.list .it{display:flex;align-items:center;gap:10px;padding:7px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:4px}
-.list .it:first-of-type{border-top:0}
-.list .it:hover{background:var(--hover)}
-.list .it div{min-width:0;flex:1}
-.list b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.list small{color:var(--mute);font-size:12px}
+.ph{display:flex;align-items:center;margin-bottom:6px}
+.ph h2{margin:0;flex:1}
+.lnk{border:0;background:none;color:var(--acc);font-size:12px;font-weight:600;padding:2px 4px;border-radius:4px}
+.lnk:hover{text-decoration:underline}
+.dl{display:grid;grid-template-columns:92px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px;border-top:1px solid var(--line);cursor:pointer;border-radius:4px}
+.dls .dl:first-child{border-top:0}
+.dl:hover{background:var(--hover)}
+.dl .t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .t b{font-weight:600}
+.dl .t small{color:var(--mute);font-size:12px;margin-left:8px}
 .stage{display:grid;grid-template-columns:116px 1fr 20px;gap:10px;align-items:center;margin:8px 0;font-size:12.5px}
 .stage em{font-style:normal;color:var(--mute);text-align:right}
 .empty{color:var(--mute);padding:10px 4px;font-size:12.5px}
@@ -153,6 +157,8 @@ textarea{min-height:56px;resize:vertical}
   .search{order:5;width:100%}
   #view{padding:12px}
   .grid2,.row,.row3{grid-template-columns:1fr}
+  .dl{grid-template-columns:84px minmax(0,1fr)}
+  .dl .st{display:none}
   .strip{grid-template-columns:1fr 1fr}
   .stat:nth-child(odd){border-left:0}
   .stat:nth-child(n+3){border-top:1px solid var(--line)}
@@ -309,12 +315,13 @@ function vRingkasan() {
   const wait = projects.filter(p => p.status === 'approval').length;
   const owed = projects.filter(p => p.status !== 'ide').reduce((s, p) => s + Math.max(0, p.value - p.paid), 0);
   const stats = [['folder', active.length, 'Proyek aktif'], ['clock', soon, 'Deadline dalam 7 hari'], ['send', wait, 'Menunggu approval'], ['wallet', rp(owed), 'Belum dibayar klien']];
-  const next = visible().filter(p => p.status !== 'selesai' && p.deadline).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 6);
+  const next = visible().filter(p => p.status !== 'selesai' && p.deadline).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 8);
   const max = Math.max(1, ...COLS.map(c => projects.filter(p => p.status === c[0]).length));
   return `<div class="strip">${stats.map(s => `<div class="stat">${ic(s[0])}<div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
   <div class="grid2">
-    <div class="panel"><h2>Deadline terdekat</h2><div class="list">${next.map(p =>
-      `<div class="it" data-open="${p.id}" tabindex="0"><div><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></div>${badge(p)}${dlChip(p)}</div>`).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
+    <div class="panel"><div class="ph"><h2>Deadline terdekat</h2><button class="lnk" data-go="proyek">Lihat semua</button></div>
+      <div class="dls">${next.map(p =>
+      `<div class="dl" data-open="${p.id}" tabindex="0"><span>${dlChip(p)}</span><span class="t"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}</span><span class="st">${badge(p)}</span></div>`).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
     <div class="panel"><h2>Proyek per tahap</h2>${COLS.map(c => { const n = projects.filter(p => p.status === c[0]).length;
       return `<div class="stage"><span>${c[1]}</span><div class="bar2" style="--c:var(${c[2]})"><span style="width:${n / max * 100}%"></span></div><em>${n}</em></div>`; }).join('')}</div>
   </div>`;
@@ -363,7 +370,7 @@ $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'
 $('#menu').onclick = () => $('#side').classList.toggle('open');
 $('#q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
 const vw = $('#view');
-vw.addEventListener('click', e => { const o = e.target.closest('[data-open]'); if (o) openModal(projects.find(p => p.id === o.dataset.open)); });
+vw.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { view = g.dataset.go; render(); return; } const o = e.target.closest('[data-open]'); if (o) openModal(projects.find(p => p.id === o.dataset.open)); });
 vw.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.closest?.('[data-open]')?.click(); });
 vw.addEventListener('change', e => { if (e.target.id === 'fs') { fs = e.target.value; render(); } });
 vw.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) e.dataTransfer.setData('text/plain', c.dataset.open); });
