@@ -254,8 +254,8 @@ input[readonly]{background:var(--hover)}
     </div>
     <div class="row3">
       <label>Deadline<input name="deadline" type="date"></label>
-      <label>Nilai (Rp)<input name="value" type="number" min="0" step="1000"></label>
-      <label>Dibayar (Rp)<input name="paid" type="number" min="0" step="1000"></label>
+      <label>Nilai (Rp)<input name="value" class="rp" inputmode="numeric" autocomplete="off"></label>
+      <label>Dibayar (Rp)<input name="paid" class="rp" inputmode="numeric" autocomplete="off"></label>
     </div>
     <div class="row">
       <label>Brief<textarea name="brief"></textarea></label>
@@ -267,7 +267,7 @@ input[readonly]{background:var(--hover)}
       <div id="il"></div>
       <div class="add"><button type="button" class="btn" id="ia"><span data-ic="plus" data-s="14"></span>Tambah item</button></div>
       <div class="calc">
-        <label>Biaya desain (Rp)<input name="design_fee" type="number" min="0" step="1000"></label>
+        <label>Biaya desain (Rp)<input name="design_fee" class="rp" inputmode="numeric" autocomplete="off"></label>
         <div class="tot">Subtotal item: <span id="isum">Rp 0</span><b id="itot">Rp 0</b></div>
       </div>
     </div>
@@ -323,6 +323,14 @@ const $ = s => document.querySelector(s);
 const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => crypto.randomUUID();
+const num = v => +String(v ?? '').replace(/\D/g, '') || 0;
+const fmt = v => { const n = num(v); return n ? n.toLocaleString('id-ID') : ''; };
+function fmtInput(el) {
+  const before = el.value.slice(0, el.selectionStart).replace(/\D/g, '').length;
+  el.value = fmt(el.value);
+  let n = 0, i = 0; for (; i < el.value.length && n < before; i++) if (/\d/.test(el.value[i])) n++;
+  el.setSelectionRange(i, i);
+}
 let sb = null;
 // Kredensial dibaca dari /api/config (Environment Variables di Vercel), bukan ditulis di file ini.
 async function initCloud() {
@@ -501,11 +509,11 @@ const itemSub = i => Math.round((i.mode === 'unit' ? 1 : (+i.w || 0) * (+i.h || 
 const itemArea = i => (+i.w || 0) * (+i.h || 0) / 1e4;
 function totals() {
   const sum = cur.items.reduce((a, i) => a + itemSub(i), 0);
-  const total = sum + (+f.design_fee.value || 0);
+  const total = sum + num(f.design_fee.value);
   $('#isum').textContent = rp(sum); $('#itot').textContent = 'Total ' + rp(total);
-  const auto = cur.items.length > 0 || (+f.design_fee.value || 0) > 0;
+  const auto = cur.items.length > 0 || num(f.design_fee.value) > 0;
   f.value.readOnly = auto;
-  if (auto) f.value.value = total;
+  if (auto) f.value.value = fmt(total);
   return total;
 }
 function renderItems() {
@@ -518,7 +526,7 @@ function renderItems() {
       <div class="r2">
         ${area ? `<label>Panjang (cm)<input data-k="w" type="number" min="0" value="${i.w ?? ''}"></label><label>Lebar (cm)<input data-k="h" type="number" min="0" value="${i.h ?? ''}"></label>` : ''}
         <label>Jumlah<input data-k="qty" type="number" min="0" value="${i.qty ?? 1}"></label>
-        <label>${area ? 'Harga per m² (Rp)' : 'Harga satuan (Rp)'}<input data-k="price" type="number" min="0" step="500" value="${i.price ?? ''}"></label>
+        <label>${area ? 'Harga per m² (Rp)' : 'Harga satuan (Rp)'}<input data-k="price" class="rp" inputmode="numeric" autocomplete="off" value="${fmt(i.price)}"></label>
       </div>
       <div class="r3">${area ? `<span data-a>${itemArea(i).toLocaleString('id-ID')} m² × ${+i.qty || 0} × ${rp(i.price)} = </span>` : ''}<b data-s>${rp(itemSub(i))}</b></div></div>`;
   }).join('');
@@ -527,13 +535,14 @@ function renderItems() {
 $('#ia').onclick = () => { cur.items.push({ id: uid(), name: '', mode: 'area', w: '', h: '', qty: 1, price: '' }); renderItems(); };
 $('#il').addEventListener('input', e => {
   const k = e.target.dataset.k, row = e.target.closest('[data-n]'); if (!k || !row) return;
-  const i = cur.items[+row.dataset.n]; i[k] = e.target.value;
+  const i = cur.items[+row.dataset.n]; i[k] = k === 'price' ? num(e.target.value) : e.target.value;
   if (k === 'mode') { renderItems(); return; }
   const a = row.querySelector('[data-a]');
   if (a) a.textContent = `${itemArea(i).toLocaleString('id-ID')} m² × ${+i.qty || 0} × ${rp(i.price)} = `;
   row.querySelector('[data-s]').textContent = rp(itemSub(i)); totals();
 });
 $('#il').addEventListener('click', e => { const d = e.target.closest('[data-di]'); if (d) { cur.items.splice(+d.dataset.di, 1); renderItems(); } });
+f.addEventListener('input', e => { if (e.target.classList.contains('rp')) fmtInput(e.target); });
 f.design_fee.addEventListener('input', totals);
 
 function openModal(p) {
@@ -541,6 +550,7 @@ function openModal(p) {
   cur.items ||= []; cur.design_fee ||= 0;
   $('#dt').textContent = p ? 'Edit proyek' : 'Proyek baru';
   for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links', 'design_fee']) f[k].value = cur[k] ?? '';
+  for (const k of ['value', 'paid', 'design_fee']) f[k].value = fmt(cur[k]);
   $('#del').hidden = !p;
   renderSub(); renderItems(); dlg.showModal();
 }
@@ -559,9 +569,9 @@ $('#rn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDe
 f.addEventListener('submit', async e => {
   e.preventDefault();
   const p = { ...cur, title: f.title.value.trim(), client: f.client.value.trim(), status: f.status.value,
-    deadline: f.deadline.value || null, value: +f.value.value || 0, paid: +f.paid.value || 0,
+    deadline: f.deadline.value || null, value: num(f.value.value), paid: num(f.paid.value),
     brief: f.brief.value, links: f.links.value,
-    items: cur.items.filter(i => i.name.trim() || +i.price).map(i => ({ ...i, name: i.name.trim() })), design_fee: +f.design_fee.value || 0 };
+    items: cur.items.filter(i => i.name.trim() || +i.price).map(i => ({ ...i, name: i.name.trim() })), design_fee: num(f.design_fee.value) };
   if (p.items.length || p.design_fee) p.value = p.items.reduce((a, i) => a + itemSub(i), 0) + p.design_fee;
   if (!p.id) delete p.id;
   try { await db.save(p); dlg.close(); render(); } catch (err) { alert('Gagal menyimpan: ' + err.message); }
