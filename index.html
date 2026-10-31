@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meja Kerja</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,16 +17,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f5f6f8;--panel:#fff;--ink:#101828;--mute:#667085;--line:#e4e7ec;--hover:#f9fafb;
-  --acc:#2f4fd1;--on-acc:#fff;--red:#d92d20;--amber:#b54708;--green:#12873f;
-  --s1:#98a2b3;--s2:#2f4fd1;--s3:#0e8aa6;--s4:#d9690f;--s5:#7c4dd6;--s6:#12873f;
-  --side:#0c1322;
+  color-scheme:dark;
+  --bg:#0a0a0a;--panel:#141414;--ink:#f5f5f5;--mute:#9b9b9b;--line:#2a2a2a;--hover:#1c1c1c;
+  --acc:#ffcc00;--on-acc:#000;--red:#ff5c4d;--amber:#ffcc00;--green:#5ed38a;
+  --s1:#8a8a8a;--s2:#5aa9ff;--s3:#2fc6b8;--s4:#ff8a3d;--s5:#b48cff;--s6:#5ed38a;
+  --side:#000;
 }
-@media(prefers-color-scheme:dark){:root{
-  --bg:#0b101b;--panel:#111827;--ink:#e6eaf2;--mute:#8d99ae;--line:#1f2a3d;--hover:#151e30;
-  --acc:#7b93ff;--on-acc:#0b101b;--red:#f97066;--amber:#fdb022;--green:#47cd89;
-  --s1:#98a2b3;--s2:#7b93ff;--s3:#22b8d4;--s4:#fb923c;--s5:#a78bfa;--s6:#47cd89;
-}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums}
@@ -40,11 +36,12 @@ svg{flex:none;display:block}
 /* sidebar */
 .side{background:var(--side);color:#aab4c5;display:flex;flex-direction:column;padding:14px 10px;position:sticky;top:0;height:100vh}
 .brand{display:flex;align-items:center;gap:8px;padding:2px 8px 14px;color:#fff;font-weight:700;font-size:14px}
-.brand span{width:26px;height:26px;border-radius:7px;background:#2f4fd1;display:grid;place-items:center;color:#fff}
+.brand span{width:26px;height:26px;border-radius:7px;background:var(--acc);display:grid;place-items:center;color:#000}
 .nav{display:grid;gap:1px}
 .nav button{display:flex;align-items:center;gap:10px;border:0;background:none;color:inherit;text-align:left;padding:7px 10px;border-radius:6px;font-weight:500}
 .nav button:hover{background:rgba(255,255,255,.06);color:#e6eaf2}
-.nav button.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 2px 0 0 var(--acc)}
+.nav button.on{background:#1a1a1a;color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
+.nav button.on svg{color:var(--acc)}
 .side .foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.09);padding:10px 2px 0;display:grid;gap:4px;font-size:12px}
 .side .foot button{display:flex;align-items:center;gap:8px;border:0;background:none;color:#aab4c5;padding:6px 8px;border-radius:6px;text-align:left}
 .side .foot button:hover{background:rgba(255,255,255,.06);color:#e6eaf2}
@@ -53,7 +50,7 @@ svg{flex:none;display:block}
 /* topbar + main */
 .main{min-width:0;display:flex;flex-direction:column}
 .net{background:#b54708;color:#fff;text-align:center;padding:5px 12px;font-size:12px}
-.bar{display:flex;align-items:center;gap:10px;padding:0 20px;height:52px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.bar{display:flex;align-items:center;gap:10px;padding:0 20px;height:52px;border-bottom:2px solid var(--acc);background:var(--panel);position:sticky;top:0;z-index:5}
 .bar h1{font-size:15px;font-weight:700;margin-right:auto}
 .menu{display:none;border:1px solid var(--line);background:none;border-radius:6px;padding:6px}
 .search{position:relative;width:240px}
@@ -73,16 +70,16 @@ svg{flex:none;display:block}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
 .stat{display:flex;gap:10px;align-items:center;padding:12px 16px;border-left:1px solid var(--line)}
 .stat:first-child{border-left:0}
-.stat svg{color:var(--mute)}
+.stat svg{color:var(--acc)}
 .stat b{display:block;font-size:17px;font-weight:700;line-height:1.2}
 .stat span{font-size:12px;color:var(--mute)}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:0 8px;border-radius:99px;font-size:11.5px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);white-space:nowrap}
 .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
 .chip{padding:0 7px;border-radius:99px;font-size:11.5px;font-weight:600;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
-.chip.soon{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber);border-color:transparent}
+.chip.soon{background:var(--acc);color:#000;border-color:transparent}
 .chip.late{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red);border-color:transparent}
 .bar2{height:5px;background:var(--line);border-radius:5px;overflow:hidden}
-.bar2 span{display:block;height:100%;background:var(--c,var(--green));border-radius:5px}
+.bar2 span{display:block;height:100%;background:var(--c,var(--acc));border-radius:5px}
 .list .it{display:flex;align-items:center;gap:10px;padding:7px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:4px}
 .list .it:first-of-type{border-top:0}
 .list .it:hover{background:var(--hover)}
@@ -330,7 +327,7 @@ function vBoard() {
     return `<div class="col" data-col="${k}" style="--c:var(${c})"><h3><i></i>${label}<em>${items.length}</em></h3>${items.map(p =>
       `<div class="card" draggable="true" data-open="${p.id}" tabindex="0"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
        <div class="meta">${dlChip(p)}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
-       ${p.tasks.length ? `<div class="bar2" style="--c:var(--green)"><span style="width:${p.tasks.filter(t => t.done).length / p.tasks.length * 100}%"></span></div>` : ''}</div>`).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
+       ${p.tasks.length ? `<div class="bar2" style="--c:var(--acc)"><span style="width:${p.tasks.filter(t => t.done).length / p.tasks.length * 100}%"></span></div>` : ''}</div>`).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
   }).join('')}</div>`;
 }
 
