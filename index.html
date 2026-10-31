@@ -6,94 +6,180 @@
 <title>Meja Kerja</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#e8ebe4;--card:#f8f9f5;--ink:#18222c;--mute:#5f6b73;--line:#cfd5cb;
-  --blue:#2c47e0;--mark:#f3d63d;--red:#c8372d;--green:#2f7a4f;
-  --ide:#8a949b;--brief:#2c47e0;--kerja:#0f8f8f;--revisi:#b8641a;--approval:#7a3fb0;--selesai:#2f7a4f;
+  --bg:#f4f6f9;--panel:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--hover:#f8fafc;
+  --acc:#3b5bdb;--acc-soft:#e7ecff;--red:#dc2626;--amber:#f59e0b;--green:#16a34a;
+  --s1:#94a3b8;--s2:#3b5bdb;--s3:#0891b2;--s4:#ea7a1a;--s5:#8b5cf6;--s6:#16a34a;
+  --side:#0b1220;
 }
 @media(prefers-color-scheme:dark){:root{
-  --bg:#12181e;--card:#1b232b;--ink:#e9eee8;--mute:#98a4ab;--line:#2c3740;
-  --blue:#7d93ff;--mark:#f3d63d;--red:#ff7a6e;--green:#6fcf94;
-  --ide:#8a949b;--brief:#7d93ff;--kerja:#3fc7c7;--revisi:#f0a05a;--approval:#c38cf0;--selesai:#6fcf94;
+  --bg:#0a0f1c;--panel:#121a2b;--ink:#e5eaf3;--mute:#8b97ab;--line:#24304a;--hover:#172035;
+  --acc:#7d96ff;--acc-soft:#1c2850;--red:#f87171;--green:#4ade80;
+  --s1:#94a3b8;--s2:#7d96ff;--s3:#22b8d4;--s4:#fb923c;--s5:#a78bfa;--s6:#4ade80;
 }}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif}
-h1,h2,h3{font-family:'Bricolage Grotesque',Georgia,sans-serif;margin:0;letter-spacing:-.01em}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif}
+h1,h2,h3,p{margin:0}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.top{display:flex;align-items:center;gap:12px;padding:18px 24px 6px;flex-wrap:wrap}
-.top h1{font-size:28px;flex:1}
-.btn{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:8px}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+svg{flex:none;display:block}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* sidebar */
+.side{background:var(--side);color:#cbd5e1;display:flex;flex-direction:column;padding:18px 12px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 20px;color:#fff;font-weight:700;font-size:16px}
+.brand span{width:32px;height:32px;border-radius:9px;background:var(--acc);display:grid;place-items:center;color:#fff}
+.nav{display:grid;gap:2px}
+.nav button{display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;text-align:left;padding:10px 12px;border-radius:8px;font-weight:500}
+.nav button:hover{background:rgba(255,255,255,.06)}
+.nav button.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
+.side .foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding:12px 6px 0;display:grid;gap:8px;font-size:12.5px}
+.side .foot button{display:flex;align-items:center;gap:8px;border:0;background:none;color:#cbd5e1;padding:6px 6px;border-radius:6px}
+.side .foot button:hover{background:rgba(255,255,255,.06)}
+.side .foot small{color:#8b97ab;padding:0 6px;overflow-wrap:anywhere}
+
+/* topbar + main */
+.main{min-width:0;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.bar h1{font-size:20px;font-weight:700;margin-right:auto}
+.menu{display:none;border:1px solid var(--line);background:none;border-radius:8px;padding:7px}
+.search{position:relative;width:260px}
+.search svg{position:absolute;left:10px;top:9px;color:var(--mute)}
+.search input{padding-left:34px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:8px;font-weight:600}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
 .btn.danger{color:var(--red)}
-.sum{display:flex;gap:28px;padding:10px 24px 18px;flex-wrap:wrap}
-.sum div b{display:block;font:700 26px 'Bricolage Grotesque',sans-serif}
-.sum div span{color:var(--mute);font-size:13px}
-.board{display:flex;gap:14px;padding:0 24px 32px;overflow-x:auto;align-items:flex-start}
-.col{flex:0 0 268px;background:color-mix(in srgb,var(--card) 55%,transparent);border-radius:10px;padding:10px;min-height:140px}
-.col.over{outline:2px dashed var(--blue)}
-.col h3{font-size:16px;display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
-.col h3 i{width:10px;height:10px;border-radius:50%;background:var(--c)}
-.col h3 em{margin-left:auto;font-style:normal;color:var(--mute);font-size:13px}
-.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab}
-.card:active{cursor:grabbing}
+#view{padding:24px 28px 40px}
+
+/* generic */
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px}
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h2{font-size:15px;font-weight:700;margin-bottom:12px}
+.stat{display:flex;gap:14px;align-items:center}
+.stat .ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc)}
+.stat b{display:block;font-size:22px;font-weight:700;line-height:1.2}
+.stat span{color:var(--mute);font-size:12.5px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.chip{padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid var(--line);color:var(--mute)}
+.chip.soon{background:color-mix(in srgb,var(--amber) 20%,transparent);color:#b45309;border-color:transparent}
+.chip.late{background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red);border-color:transparent}
+.bar2{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar2 span{display:block;height:100%;background:var(--c,var(--green));border-radius:6px}
+.list .it{display:flex;align-items:center;gap:12px;padding:10px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:6px}
+.list .it:first-of-type{border-top:0}
+.list .it:hover{background:var(--hover)}
+.list .it div{min-width:0;flex:1}
+.list b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list small{color:var(--mute)}
+.stage{display:grid;grid-template-columns:130px 1fr 24px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
+.stage em{font-style:normal;color:var(--mute);text-align:right}
+.empty{color:var(--mute);padding:14px 4px}
+
+/* board */
+.board{display:flex;gap:14px;overflow-x:auto;align-items:flex-start;padding-bottom:8px}
+.col{flex:0 0 272px;background:color-mix(in srgb,var(--line) 45%,transparent);border-radius:12px;padding:10px;min-height:150px}
+.col.over{outline:2px dashed var(--acc)}
+.col h3{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
+.col h3 i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.col h3 em{margin-left:auto;font-style:normal;font-weight:600;color:var(--mute);background:var(--panel);border-radius:99px;padding:0 8px;font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px;cursor:grab}
+.card:hover{border-color:var(--acc)}
 .card b{display:block;font-weight:600}
 .card small{color:var(--mute)}
-.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:12.5px}
-.chip{padding:1px 8px;border-radius:99px;border:1px solid var(--line)}
-.chip.soon{background:var(--mark);color:#18222c;border-color:var(--mark);font-weight:600}
-.chip.late{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}
-.bar{height:4px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}
-.bar span{display:block;height:100%;background:var(--green)}
-.empty{color:var(--mute);font-size:13px;padding:6px 4px}
-dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:min(620px,94vw);padding:0}
-dialog::backdrop{background:rgba(10,14,18,.5)}
-form{padding:20px;display:grid;gap:12px}
-label{display:grid;gap:4px;font-weight:500;font-size:14px}
-input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;width:100%}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+
+/* table */
+.tools{display:flex;gap:10px;margin-bottom:14px}
+.tools select{width:auto}
+.tbl{overflow-x:auto;padding:0}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{text-align:left;font-size:12.5px;color:var(--mute);font-weight:600;padding:12px 16px;border-bottom:1px solid var(--line)}
+td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr[data-open]{cursor:pointer}
+tr[data-open]:hover td{background:var(--hover)}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td small{display:block;color:var(--mute)}
+
+/* modal */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);width:min(640px,94vw);padding:0;max-height:92vh}
+dialog::backdrop{background:rgba(8,12,22,.55)}
+.dh{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dh h2{font-size:17px;flex:1}
+.x{border:0;background:none;color:var(--mute);padding:4px;border-radius:6px}
+.x:hover{background:var(--hover)}
+form{display:grid;gap:14px;padding:20px}
+label{display:grid;gap:5px;font-weight:600;font-size:13px}
+input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 10px;width:100%;font-weight:400}
 textarea{min-height:70px;resize:vertical}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.sub{border-top:1px solid var(--line);padding-top:12px}
-.sub h3{font-size:16px;margin-bottom:6px}
-.item{display:flex;gap:8px;align-items:center;padding:3px 0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sub{border-top:1px solid var(--line);padding-top:14px}
+.sub h3{font-size:14px;margin-bottom:6px}
+.item{display:flex;gap:8px;align-items:center;padding:4px 0}
 .item input[type=checkbox]{width:auto}
-.item .x{margin-left:auto;border:0;background:none;color:var(--mute)}
+.item .x{margin-left:auto}
 .item.done span{text-decoration:line-through;color:var(--mute)}
 .add{display:flex;gap:8px;margin-top:6px}
-.links a{color:var(--blue);display:block;overflow-wrap:anywhere}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
-#auth{max-width:340px;margin:12vh auto;padding:24px;display:grid;gap:12px}
-.note{background:var(--mark);color:#18222c;padding:6px 24px;font-size:13px}
-@media(max-width:560px){.row{grid-template-columns:1fr}.sum{gap:18px}}
+.lk a{display:flex;gap:6px;align-items:center;color:var(--acc);overflow-wrap:anywhere;font-size:13px}
+.actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* auth + demo */
+#auth{max-width:360px;margin:12vh auto;padding:28px;display:grid;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+#auth h1{font-size:20px}
+
+@media(max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:250px;z-index:20;transform:translateX(-100%);transition:transform .2s}
+  .side.open{transform:none}
+  .menu{display:block}
+  .bar{padding:12px 16px;flex-wrap:wrap}
+  .search{order:5;width:100%}
+  #view{padding:16px}
+  .grid2{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.side{transition:none}}
 </style>
 </head>
 <body>
 
-<div id="demo" class="note" hidden>Mode demo: data tersimpan di browser ini saja. Isi SUPABASE_URL dan SUPABASE_KEY di index.html untuk memakai Supabase.</div>
-
 <form id="auth" hidden>
-  <h1>Meja Kerja</h1>
+  <h1>Masuk ke Meja Kerja</h1>
   <label>Email<input id="em" type="email" required autocomplete="username"></label>
   <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
-  <button class="btn primary">Masuk</button>
+  <button class="btn primary" style="justify-content:center">Masuk</button>
 </form>
 
-<main id="app" hidden>
-  <header class="top">
-    <h1>Meja Kerja</h1>
-    <button class="btn primary" id="new">Proyek baru</button>
-    <button class="btn" id="out" hidden>Keluar</button>
-  </header>
-  <section class="sum" id="sum"></section>
-  <section class="board" id="board"></section>
-</main>
+<div class="shell" id="app" hidden>
+  <aside class="side" id="side">
+    <div class="brand"><span data-ic="palette"></span>Meja Kerja</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">
+      <small id="who"></small>
+      <button id="out" hidden><span data-ic="logout" data-s="16"></span>Keluar</button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="bar">
+      <button class="menu" id="menu" aria-label="Buka menu"><span data-ic="menu"></span></button>
+      <h1 id="title"></h1>
+      <div class="search"><span data-ic="search" data-s="16"></span><input id="q" type="search" placeholder="Cari judul atau klien" aria-label="Cari proyek"></div>
+      <button class="btn primary" id="new"><span data-ic="plus" data-s="16"></span>Proyek baru</button>
+    </header>
+    <main id="view"></main>
+  </div>
+</div>
 
 <dialog id="dlg">
+  <div class="dh"><h2 id="dt">Proyek</h2><button type="button" class="x" id="close" aria-label="Tutup"><span data-ic="x"></span></button></div>
   <form id="f" method="dialog">
-    <h2 id="dt">Proyek</h2>
     <label>Judul<input name="title" required></label>
     <div class="row">
       <label>Klien<input name="client"></label>
@@ -106,23 +192,19 @@ textarea{min-height:70px;resize:vertical}
     <label>Sudah dibayar (Rp)<input name="paid" type="number" min="0" step="1000"></label>
     <label>Brief<textarea name="brief"></textarea></label>
     <label>Link file (satu per baris)<textarea name="links" placeholder="https://..."></textarea></label>
-    <div class="links" id="lk"></div>
-
+    <div class="lk" id="lk"></div>
     <div class="sub">
-      <h3>Checklist</h3>
-      <div id="tl"></div>
+      <h3>Checklist</h3><div id="tl"></div>
       <div class="add"><input id="tn" placeholder="Tambah langkah, mis. Sketsa awal"><button type="button" class="btn" id="ta">Tambah</button></div>
     </div>
     <div class="sub">
-      <h3>Revisi</h3>
-      <div id="rl"></div>
+      <h3>Revisi</h3><div id="rl"></div>
       <div class="add"><input id="rn" placeholder="Catatan feedback ronde berikutnya"><button type="button" class="btn" id="ra">Catat revisi</button></div>
     </div>
-
     <div class="actions">
-      <button type="button" class="btn danger" id="del" hidden>Hapus</button>
+      <button type="button" class="btn danger" id="del" hidden><span data-ic="trash" data-s="16"></span>Hapus</button>
       <button type="button" class="btn" id="cancel">Batal</button>
-      <button class="btn primary" id="save">Simpan</button>
+      <button class="btn primary">Simpan</button>
     </div>
   </form>
 </dialog>
@@ -130,19 +212,40 @@ textarea{min-height:70px;resize:vertical}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 // ====== Isi dua nilai ini dari Supabase > Project Settings > API ======
-const SUPABASE_URL = 'https://tonskeloouigcfviswak.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvbnNrZWxvb3VpZ2Nmdmlzd2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTg3MDAsImV4cCI6MjEwODk3NDcwMH0.8l2Zo8FdsnOJX5go3WXHeRBSkgDeSDZN62T7B0Ur9IE';
+const SUPABASE_URL = '';
+const SUPABASE_KEY = '';
 // =====================================================================
 
-const COLS = [['ide','Ide','--ide'],['brief','Brief','--brief'],['kerja','Dikerjakan','--kerja'],
-  ['revisi','Revisi','--revisi'],['approval','Menunggu approval','--approval'],['selesai','Selesai','--selesai']];
+const I = {
+  dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  board:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v11"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M16 13h.01"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 22a10 10 0 1 1 10-10c0 2.5-2 3-4 3h-2a2 2 0 0 0-1.5 3.3c.9 1 .2 3.7-2.5 3.7z"/>'
+};
+const ic = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+const paintIcons = () => document.querySelectorAll('[data-ic]').forEach(e => { e.innerHTML = ic(e.dataset.ic, +e.dataset.s || 20); });
+
+const COLS = [['ide','Ide','--s1'],['brief','Brief','--s2'],['kerja','Dikerjakan','--s3'],['revisi','Revisi','--s4'],['approval','Menunggu approval','--s5'],['selesai','Selesai','--s6']];
+const STAGE = Object.fromEntries(COLS.map(c => [c[0], c]));
+const VIEWS = { ringkasan:['Ringkasan','dash'], board:['Board','board'], proyek:['Semua proyek','list'], keuangan:['Keuangan','wallet'] };
 const $ = s => document.querySelector(s);
 const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => crypto.randomUUID();
 const demo = !SUPABASE_URL;
 const sb = demo ? null : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let projects = [], cur = null;
+let projects = [], cur = null, view = 'ringkasan', q = '', fs = '';
 
 const persistLocal = () => localStorage.setItem('mk_projects', JSON.stringify(projects));
 const db = {
@@ -170,59 +273,93 @@ const db = {
   }
 };
 
+// ---- helpers ----
 const daysLeft = d => d ? Math.round((new Date(d) - new Date().setHours(0,0,0,0)) / 864e5) : null;
-const doneRatio = p => p.tasks.length ? p.tasks.filter(t => t.done).length / p.tasks.length : 0;
+const visible = () => projects.filter(p => !q || (p.title + ' ' + (p.client || '')).toLowerCase().includes(q));
+const badge = p => `<span class="badge" style="--c:var(${STAGE[p.status][2]})">${STAGE[p.status][1]}</span>`;
+const taskInfo = p => p.tasks.length ? `${p.tasks.filter(t => t.done).length}/${p.tasks.length}` : '-';
+function dlChip(p) {
+  const d = daysLeft(p.deadline);
+  if (d === null) return '';
+  if (d < 0) return `<span class="chip late">Telat ${-d} hari</span>`;
+  if (d <= 3) return `<span class="chip soon">${d === 0 ? 'Hari ini' : d + ' hari lagi'}</span>`;
+  return `<span class="chip">${new Date(p.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>`;
+}
 
-function renderSummary() {
+// ---- views ----
+function vRingkasan() {
   const active = projects.filter(p => p.status !== 'selesai');
   const soon = active.filter(p => { const d = daysLeft(p.deadline); return d !== null && d <= 7; }).length;
   const wait = projects.filter(p => p.status === 'approval').length;
   const owed = projects.filter(p => p.status !== 'ide').reduce((s, p) => s + Math.max(0, p.value - p.paid), 0);
-  $('#sum').innerHTML =
-    `<div><b>${active.length}</b><span>Proyek aktif</span></div>
-     <div><b>${soon}</b><span>Deadline dalam 7 hari</span></div>
-     <div><b>${wait}</b><span>Menunggu approval</span></div>
-     <div><b>${rp(owed)}</b><span>Belum dibayar klien</span></div>`;
-}
-
-function cardHTML(p) {
-  const d = daysLeft(p.deadline);
-  const dl = d === null ? '' : d < 0 ? `<span class="chip late">Telat ${-d} hari</span>`
-    : d <= 3 ? `<span class="chip soon">${d === 0 ? 'Hari ini' : d + ' hari lagi'}</span>`
-    : `<span class="chip">${new Date(p.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>`;
-  const col = COLS.find(c => c[0] === p.status)[2];
-  return `<div class="card" draggable="true" data-id="${p.id}" style="--c:var(${col})" tabindex="0">
-    <b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
-    <div class="meta">${dl}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
-    ${p.tasks.length ? `<div class="bar"><span style="width:${doneRatio(p) * 100}%"></span></div>` : ''}
+  const stats = [['folder', active.length, 'Proyek aktif'], ['clock', soon, 'Deadline dalam 7 hari'], ['send', wait, 'Menunggu approval'], ['wallet', rp(owed), 'Belum dibayar klien']];
+  const next = visible().filter(p => p.status !== 'selesai' && p.deadline).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 6);
+  const max = Math.max(1, ...COLS.map(c => projects.filter(p => p.status === c[0]).length));
+  return `<div class="grid4">${stats.map(s => `<div class="panel stat"><div class="ico">${ic(s[0])}</div><div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
+  <div class="grid2">
+    <div class="panel"><h2>Deadline terdekat</h2><div class="list">${next.map(p =>
+      `<div class="it" data-open="${p.id}" tabindex="0"><div><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></div>${badge(p)}${dlChip(p)}</div>`).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
+    <div class="panel"><h2>Proyek per tahap</h2>${COLS.map(c => { const n = projects.filter(p => p.status === c[0]).length;
+      return `<div class="stage"><span>${c[1]}</span><div class="bar2" style="--c:var(${c[2]})"><span style="width:${n / max * 100}%"></span></div><em>${n}</em></div>`; }).join('')}</div>
   </div>`;
 }
 
-function render() {
-  renderSummary();
-  $('#board').innerHTML = COLS.map(([k, label, c]) => {
-    const list = projects.filter(p => p.status === k)
-      .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
-    return `<div class="col" data-col="${k}" style="--c:var(${c})">
-      <h3><i></i>${label}<em>${list.length}</em></h3>
-      ${list.map(cardHTML).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
-  }).join('');
+function vBoard() {
+  const list = visible();
+  return `<div class="board">${COLS.map(([k, label, c]) => {
+    const items = list.filter(p => p.status === k).sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+    return `<div class="col" data-col="${k}" style="--c:var(${c})"><h3><i></i>${label}<em>${items.length}</em></h3>${items.map(p =>
+      `<div class="card" draggable="true" data-open="${p.id}" tabindex="0"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
+       <div class="meta">${dlChip(p)}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
+       ${p.tasks.length ? `<div class="bar2" style="--c:var(--green)"><span style="width:${p.tasks.filter(t => t.done).length / p.tasks.length * 100}%"></span></div>` : ''}</div>`).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
+  }).join('')}</div>`;
 }
 
-// ---- drag & drop ----
-const board = $('#board');
-board.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) e.dataTransfer.setData('text/plain', c.dataset.id); });
-board.addEventListener('dragover', e => { const c = e.target.closest('.col'); if (c) { e.preventDefault(); c.classList.add('over'); } });
-board.addEventListener('dragleave', e => e.target.closest('.col')?.classList.remove('over'));
-board.addEventListener('drop', async e => {
+function vProyek() {
+  const list = visible().filter(p => !fs || p.status === fs)
+    .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+  return `<div class="tools"><select id="fs" aria-label="Filter tahap"><option value="">Semua tahap</option>${COLS.map(c => `<option value="${c[0]}" ${fs === c[0] ? 'selected' : ''}>${c[1]}</option>`).join('')}</select></div>
+  <div class="panel tbl"><table><thead><tr><th>Proyek</th><th>Tahap</th><th>Deadline</th><th>Checklist</th><th class="n">Nilai</th></tr></thead><tbody>${list.map(p =>
+    `<tr data-open="${p.id}" tabindex="0"><td><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></td><td>${badge(p)}</td><td>${dlChip(p) || '-'}</td><td>${taskInfo(p)}</td><td class="n">${rp(p.value)}</td></tr>`).join('')
+    || '<tr><td colspan="5" class="empty">Belum ada proyek. Klik Proyek baru untuk memulai.</td></tr>'}</tbody></table></div>`;
+}
+
+function vKeuangan() {
+  const list = visible().filter(p => p.value > 0);
+  const tv = list.reduce((s, p) => s + p.value, 0), tp = list.reduce((s, p) => s + p.paid, 0);
+  const stats = [['wallet', rp(tv), 'Total nilai proyek'], ['send', rp(tp), 'Sudah dibayar'], ['clock', rp(Math.max(0, tv - tp)), 'Belum dibayar']];
+  return `<div class="grid4">${stats.map(s => `<div class="panel stat"><div class="ico">${ic(s[0])}</div><div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
+  <div class="panel tbl"><table><thead><tr><th>Proyek</th><th class="n">Nilai</th><th class="n">Dibayar</th><th class="n">Sisa</th><th>Pelunasan</th></tr></thead><tbody>${list.map(p =>
+    `<tr data-open="${p.id}" tabindex="0"><td><b>${esc(p.title)}</b><small>${esc(p.client || 'Tanpa klien')}</small></td><td class="n">${rp(p.value)}</td><td class="n">${rp(p.paid)}</td><td class="n">${rp(Math.max(0, p.value - p.paid))}</td>
+     <td style="min-width:120px"><div class="bar2"><span style="width:${Math.min(100, p.paid / p.value * 100)}%"></span></div></td></tr>`).join('')
+    || '<tr><td colspan="5" class="empty">Isi nilai proyek di detail proyek untuk melihat rekap keuangan.</td></tr>'}</tbody></table></div>`;
+}
+
+const RENDER = { ringkasan: vRingkasan, board: vBoard, proyek: vProyek, keuangan: vKeuangan };
+function render() {
+  $('#title').textContent = VIEWS[view][0];
+  $('#nav').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-v="${k}" class="${k === view ? 'on' : ''}">${ic(v[1])}${v[0]}</button>`).join('');
+  $('#view').innerHTML = RENDER[view]();
+}
+
+// ---- events: nav, search, open, drag & drop ----
+$('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { view = b.dataset.v; $('#side').classList.remove('open'); render(); } });
+$('#menu').onclick = () => $('#side').classList.toggle('open');
+$('#q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
+const vw = $('#view');
+vw.addEventListener('click', e => { const o = e.target.closest('[data-open]'); if (o) openModal(projects.find(p => p.id === o.dataset.open)); });
+vw.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.closest?.('[data-open]')?.click(); });
+vw.addEventListener('change', e => { if (e.target.id === 'fs') { fs = e.target.value; render(); } });
+vw.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) e.dataTransfer.setData('text/plain', c.dataset.open); });
+vw.addEventListener('dragover', e => { const c = e.target.closest('.col'); if (c) { e.preventDefault(); c.classList.add('over'); } });
+vw.addEventListener('dragleave', e => e.target.closest('.col')?.classList.remove('over'));
+vw.addEventListener('drop', async e => {
   const col = e.target.closest('.col'); if (!col) return;
   e.preventDefault();
   const p = projects.find(x => x.id === e.dataTransfer.getData('text/plain'));
   if (p && p.status !== col.dataset.col) { try { await db.save({ ...p, status: col.dataset.col }); } catch (err) { alert(err.message); } }
   render();
 });
-board.addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openModal(projects.find(p => p.id === c.dataset.id)); });
-board.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.closest('.card')?.click(); });
 
 // ---- modal ----
 const dlg = $('#dlg'), f = $('#f');
@@ -230,13 +367,12 @@ f.status.innerHTML = COLS.map(c => `<option value="${c[0]}">${c[1]}</option>`).j
 
 function renderSub() {
   $('#tl').innerHTML = cur.tasks.map((t, i) =>
-    `<div class="item ${t.done ? 'done' : ''}"><input type="checkbox" data-t="${i}" ${t.done ? 'checked' : ''}><span>${esc(t.title)}</span><button type="button" class="x" data-dt="${i}" aria-label="Hapus langkah">✕</button></div>`).join('')
+    `<div class="item ${t.done ? 'done' : ''}"><input type="checkbox" data-t="${i}" ${t.done ? 'checked' : ''} aria-label="Selesai"><span>${esc(t.title)}</span><button type="button" class="x" data-dt="${i}" aria-label="Hapus langkah">${ic('x', 16)}</button></div>`).join('')
     || '<div class="empty">Belum ada langkah.</div>';
-  $('#rl').innerHTML = cur.revisions.map(r =>
-    `<div class="item"><b>Ronde ${r.round}</b><span>${esc(r.note)}</span></div>`).join('')
+  $('#rl').innerHTML = cur.revisions.map(r => `<div class="item"><b>Ronde ${r.round}</b><span>${esc(r.note)}</span></div>`).join('')
     || '<div class="empty">Belum ada revisi.</div>';
-  const urls = (f.links.value.match(/https?:\/\/\S+/g) || []);
-  $('#lk').innerHTML = urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join('');
+  $('#lk').innerHTML = (f.links.value.match(/https?:\/\/\S+/g) || [])
+    .map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${ic('link', 14)}${esc(u)}</a>`).join('');
 }
 
 function openModal(p) {
@@ -246,15 +382,14 @@ function openModal(p) {
   $('#del').hidden = !p;
   renderSub(); dlg.showModal();
 }
-
 $('#new').onclick = () => openModal();
-$('#cancel').onclick = () => dlg.close();
+$('#cancel').onclick = $('#close').onclick = () => dlg.close();
 f.links.addEventListener('input', renderSub);
 $('#ta').onclick = () => { const v = $('#tn').value.trim(); if (v) { cur.tasks.push({ id: uid(), title: v, done: false }); $('#tn').value = ''; renderSub(); } };
 $('#ra').onclick = () => { const v = $('#rn').value.trim(); if (v) { cur.revisions.push({ round: cur.revisions.length + 1, note: v, date: new Date().toISOString() }); $('#rn').value = ''; renderSub(); } };
 dlg.addEventListener('click', e => {
   if (e.target.dataset.t !== undefined) { cur.tasks[+e.target.dataset.t].done = e.target.checked; renderSub(); }
-  if (e.target.dataset.dt !== undefined) { cur.tasks.splice(+e.target.dataset.dt, 1); renderSub(); }
+  const d = e.target.closest('[data-dt]'); if (d) { cur.tasks.splice(+d.dataset.dt, 1); renderSub(); }
 });
 $('#tn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#ta').click(); } });
 $('#rn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#ra').click(); } });
@@ -273,21 +408,24 @@ $('#del').onclick = async () => {
 };
 
 // ---- auth & start ----
-async function start() {
+async function start(email) {
   try { projects = await db.load(); } catch (err) { alert('Gagal memuat data: ' + err.message); }
-  $('#auth').hidden = true; $('#app').hidden = false; $('#out').hidden = demo;
-  render();
+  $('#auth').hidden = true; $('#app').hidden = false;
+  $('#out').hidden = demo;
+  $('#who').textContent = demo ? 'Mode demo: data tersimpan di browser ini. Isi SUPABASE_URL dan SUPABASE_KEY untuk memakai Supabase.' : email;
+  paintIcons(); render();
 }
 $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 $('#auth').addEventListener('submit', async e => {
   e.preventDefault();
-  const { error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
-  error ? alert('Login gagal: ' + error.message) : start();
+  const { data, error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
+  error ? alert('Login gagal: ' + error.message) : start(data.user.email);
 });
 (async () => {
-  if (demo) { $('#demo').hidden = false; return start(); }
+  paintIcons();
+  if (demo) return start();
   const { data } = await sb.auth.getSession();
-  data.session ? start() : $('#auth').hidden = false;
+  data.session ? start(data.session.user.email) : $('#auth').hidden = false;
 })();
 </script>
 </body>
