@@ -48,7 +48,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 svg{flex:none;display:block}
 :focus-visible{outline:2px solid var(--acc);outline-offset:1px}
-.shell{display:grid;grid-template-columns:208px 1fr;min-height:100vh}
+.shell{display:grid;grid-template-columns:var(--sw,60px) 1fr;min-height:100vh;transition:grid-template-columns .18s ease}
+.shell.pin{--sw:208px}
 
 /* sidebar */
 .side{background:var(--side);color:#aab4c5;display:flex;flex-direction:column;padding:14px 10px;position:sticky;top:0;height:100vh}
@@ -226,7 +227,20 @@ input[readonly]{background:var(--hover)}
 #auth{max-width:340px;margin:12vh auto;padding:22px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
 #auth h1{font-size:17px}
 
+@media(min-width:861px){
+  .side{width:60px;overflow:hidden;white-space:nowrap;transition:width .18s ease,box-shadow .18s;z-index:25;cursor:pointer}
+  .side:hover,.side:has(:focus-visible){width:208px;box-shadow:8px 0 28px rgba(0,0,0,.28)}
+  .shell.pin .side{width:208px;box-shadow:none}
+  .side button{cursor:pointer}
+  .shell:not(.pin) .side:not(:hover):not(:has(:focus-visible)) :is(.nav button,.foot button,.brand){font-size:0;gap:0;justify-content:center}
+  .shell:not(.pin) .side:not(:hover):not(:has(:focus-visible)) .foot small{display:none}
+  .shell:not(.pin) .side:not(:hover):not(:has(:focus-visible)) .brand .pin{display:none}
+  .side .foot small{overflow:hidden;text-overflow:ellipsis}
+  .brand .pin{margin-left:auto;color:var(--mute);opacity:.7;display:grid}
+  .shell.pin .brand .pin{color:var(--acc);opacity:1}
+}
 @media(max-width:860px){
+  .brand .pin{display:none}
   .shell{grid-template-columns:1fr}
   .side{position:fixed;inset:0 auto 0 0;width:230px;z-index:20;transform:translateX(-100%);transition:transform .2s}
   .side.open{transform:none}
@@ -261,7 +275,7 @@ input[readonly]{background:var(--hover)}
 
 <div class="shell" id="app" hidden>
   <aside class="side" id="side">
-    <div class="brand"><span data-ic="palette" data-s="16"></span>Meja Kerja</div>
+    <div class="brand" title="Klik area sidebar untuk menyematkan / auto-hide"><span data-ic="palette" data-s="16"></span>Meja Kerja<i class="pin" data-ic="pin" data-s="14"></i></div>
     <nav class="nav" id="nav"></nav>
     <div class="foot">
       <small id="who"></small>
@@ -364,6 +378,7 @@ const I = {
   link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  pin:'<path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/>',
   palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 22a10 10 0 1 1 10-10c0 2.5-2 3-4 3h-2a2 2 0 0 0-1.5 3.3c.9 1 .2 3.7-2.5 3.7z"/>'
 };
 const ic = (n, s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
@@ -525,6 +540,16 @@ function render() {
 
 // ---- events: nav, search, open, drag & drop ----
 $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { view = b.dataset.v; $('#side').classList.remove('open'); render(); } });
+// sidebar: auto-hide (ikon saja), melebar saat hover; klik area sidebar (bukan menu) untuk menyematkan / melepas
+let pinned = false;
+try { pinned = localStorage.getItem('sidePin') === '1'; } catch {}
+const paintPin = () => document.querySelector('.shell').classList.toggle('pin', pinned);
+paintPin();
+$('#side').addEventListener('click', e => {
+  if (innerWidth <= 860 || e.target.closest('button, a, input')) return;
+  pinned = !pinned; paintPin();
+  try { localStorage.setItem('sidePin', pinned ? '1' : '0'); } catch {}
+});
 $('#menu').onclick = () => $('#side').classList.toggle('open');
 $('#q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
 const vw = $('#view');
