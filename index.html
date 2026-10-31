@@ -178,7 +178,15 @@ form{display:flex;flex-direction:column;min-height:0;flex:1}
 .sec{display:grid;gap:10px;padding:16px 0;border-bottom:1px solid var(--line)}
 .sec:last-child{border-bottom:0}
 .sec>h3,.sub h3{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
-.sub{border-top:0;padding-top:0}
+.sub{display:flex;flex-direction:column;gap:6px;min-width:0}
+.subs{align-items:stretch}
+.sub .empty{padding-left:0;padding-top:2px;padding-bottom:2px;text-align:left}
+.subs .add{margin-top:auto;padding-top:6px}
+.add input{flex:1;min-width:0}
+.add .btn{min-width:84px;justify-content:center;flex:none}
+.row{align-items:stretch}
+.row:has(textarea)>label{grid-template-rows:auto 1fr}
+.row textarea{height:100%;min-height:110px}
 .addit{justify-self:start}
 input[type=number]{-moz-appearance:textfield;appearance:textfield}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -198,7 +206,6 @@ select option{background:var(--panel);color:var(--ink);padding:8px 10px}
 select option:checked{background:var(--acc);color:#000}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.sub{border-top:1px solid var(--line);padding-top:10px}
 .sub h3{font-size:12.5px;margin-bottom:4px}
 .item{display:flex;gap:8px;align-items:center;padding:2px 0}
 .item input[type=checkbox]{width:auto}
