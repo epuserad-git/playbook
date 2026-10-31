@@ -130,12 +130,25 @@ svg{flex:none;display:block}
 .ph h2{margin:0;flex:1}
 .lnk{border:0;background:none;color:var(--acc);font-size:12px;font-weight:600;padding:2px 4px;border-radius:4px}
 .lnk:hover{text-decoration:underline}
-.dl{display:grid;grid-template-columns:92px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px;border-top:1px solid var(--line);cursor:pointer;border-radius:4px}
-.dls .dl:first-child{border-top:0}
-.dl:hover{background:var(--hover)}
-.dl .t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dl .t b{font-weight:600}
-.dl .t small{color:var(--mute);font-size:12px;margin-left:8px}
+.dls{display:grid;gap:8px;margin-top:4px}
+.dl{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--panel);transition:border-color .15s,background .15s}
+.dl:hover{background:var(--hover);border-color:var(--mute)}
+.dd{display:grid;place-items:center;align-content:center;height:48px;border-radius:8px;background:var(--hover);border:1px solid var(--line);line-height:1.1}
+.dd b{font-size:17px;font-weight:700}
+.dd small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.dl.soon .dd{background:var(--acc);border-color:transparent;color:#000}
+.dl.soon .dd small{color:#000;opacity:.7}
+.dl.late .dd{background:color-mix(in srgb,var(--red) 14%,transparent);border-color:transparent;color:var(--red)}
+.dl.late .dd small{color:var(--red)}
+.dl .t{min-width:0}
+.dl .t>b{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .t small{display:block;color:var(--mute);font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .t small i{font-style:normal;margin:0 6px;opacity:.6}
+.dl .t .bar2{margin-top:7px}
+.dl .st{display:grid;justify-items:end;gap:5px}
+.dl .when{font-size:12px;font-weight:700}
+.dl.soon .when{color:var(--acc)}
+.dl.late .when{color:var(--red)}
 .empty{color:var(--mute);padding:10px 4px;font-size:12.5px}
 
 /* board */
@@ -261,8 +274,7 @@ input[readonly]{background:var(--hover)}
   .calc{grid-template-columns:1fr}
   dialog{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;border:0}
   .ag{grid-template-columns:repeat(7,minmax(0,1fr))}
-  .dl{grid-template-columns:84px minmax(0,1fr)}
-  .dl .st{display:none}
+  .dl .st .badge{display:none}
   .strip{grid-template-columns:1fr 1fr}
   .stat:nth-child(odd){border-left:0}
   .stat:nth-child(n+3){border-top:1px solid var(--line)}
@@ -442,6 +454,17 @@ const daysLeft = d => d ? Math.round((new Date(d) - new Date().setHours(0,0,0,0)
 const visible = () => projects.filter(p => !q || (p.title + ' ' + (p.client || '')).toLowerCase().includes(q));
 const badge = p => `<span class="badge" style="--c:var(${STAGE[p.status][2]})">${STAGE[p.status][1]}</span>`;
 const taskInfo = p => p.tasks.length ? `${p.tasks.filter(t => t.done).length}/${p.tasks.length}` : '-';
+function dlRow(p) {
+  const d = daysLeft(p.deadline), dt = new Date(p.deadline);
+  const tone = d < 0 ? 'late' : d <= 3 ? 'soon' : '';
+  const when = d < 0 ? `Telat ${-d} hari` : d === 0 ? 'Hari ini' : d === 1 ? 'Besok' : `${d} hari lagi`;
+  const done = p.tasks.filter(t => t.done).length;
+  const meta = [p.client ? esc(p.client) : '', p.tasks.length ? `Checklist ${done}/${p.tasks.length}` : '', p.value ? rp(p.value) : ''].filter(Boolean);
+  return `<div class="dl ${tone}" data-open="${p.id}" tabindex="0">
+    <div class="dd"><b>${dt.getDate()}</b><small>${dt.toLocaleDateString('id-ID', { month: 'short' })}</small></div>
+    <div class="t"><b>${esc(p.title)}</b><small>${meta.join('<i>·</i>') || 'Tanpa klien'}</small>${p.tasks.length ? `<div class="bar2" style="--c:var(--acc)"><span style="width:${done / p.tasks.length * 100}%"></span></div>` : ''}</div>
+    <div class="st"><span class="when">${when}</span>${badge(p)}</div></div>`;
+}
 function dlChip(p) {
   const d = daysLeft(p.deadline);
   if (d === null) return '';
@@ -489,8 +512,7 @@ function vRingkasan() {
       return `<div class="d${n ? ' has' : ''}${i === 0 ? ' today' : ''}${[0, 6].includes(d.getDay()) ? ' we' : ''}" title="${esc(byDay[i].join(', ') || 'Tidak ada deadline')}"><small>${d.toLocaleDateString('id-ID', { weekday: 'short' })}</small><b>${d.getDate()}</b><i>${n || ''}</i></div>`; }).join('')}</div></div>
   <div class="dash">
     <div class="panel"><div class="ph"><h2>Deadline terdekat</h2><button class="lnk" data-go="proyek">Lihat semua</button></div>
-      <div class="dls">${next.map(p =>
-      `<div class="dl" data-open="${p.id}" tabindex="0"><span>${dlChip(p)}</span><span class="t"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}</span><span class="st">${badge(p)}</span></div>`).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
+      <div class="dls">${next.map(dlRow).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
     <div class="stack">
       <div class="panel"><h2>Pipeline</h2>
         <div class="seg">${COLS.map((c, i) => cnt[i] ? `<span style="flex:${cnt[i]};--c:var(${c[2]})"></span>` : '').join('')}</div>
