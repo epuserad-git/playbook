@@ -1,5 +1,5 @@
 // Service worker: menyimpan cangkang aplikasi saja. Data dan kredensial selalu lewat jaringan.
-const VER = 'mk-v7';
+const VER = 'mk-v8';
 const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

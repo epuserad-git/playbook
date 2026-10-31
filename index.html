@@ -39,7 +39,8 @@
 [data-theme=light] .side .foot button{color:#555}
 [data-theme=light] .side .foot small{color:var(--mute)}
 [data-theme=light] .bar{box-shadow:0 1px 0 rgba(0,0,0,.03)}
-*{box-sizing:border-box}
+*{box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none;width:0;height:0}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums}
 h1,h2,h3,p{margin:0}
@@ -174,6 +175,14 @@ form{display:grid;gap:10px;padding:16px}
 label{display:grid;gap:4px;font-weight:600;font-size:12px}
 input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 9px;width:100%;font-weight:400;font-size:13px}
 textarea{min-height:56px;resize:vertical}
+select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b9b9b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center}
+[data-theme=light] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+select:hover{border-color:var(--mute)}
+select:focus{border-color:var(--acc)}
+select option{background:var(--panel);color:var(--ink);padding:8px 10px}
+select option:checked{background:var(--acc);color:#000}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .sub{border-top:1px solid var(--line);padding-top:10px}
