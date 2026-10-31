@@ -210,6 +210,10 @@ form{display:flex;flex-direction:column;min-height:0;flex:1}
 .row:has(textarea)>label{grid-template-rows:auto 1fr}
 .row textarea{height:100%;min-height:110px}
 .addit{justify-self:start}
+.ig{display:flex;gap:6px}
+.ig input{flex:1;min-width:0}
+.btn.wa{padding:6px 10px;color:#1fa855;flex:none}
+.btn.wa:hover{border-color:#1fa855}
 input[type=number]{-moz-appearance:textfield;appearance:textfield}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[readonly]{color:var(--mute)}
@@ -336,6 +340,10 @@ input[readonly]{background:var(--hover)}
         <label>Tahap<select name="status"></select></label>
         <label>Deadline<input name="deadline" type="date"></label>
       </div>
+      <div class="row">
+        <label>Contact person<input name="contact" placeholder="Nama kontak di klien"></label>
+        <label>WhatsApp<span class="ig"><input name="wa" type="tel" inputmode="tel" autocomplete="off" placeholder="08xx xxxx xxxx"><a class="btn wa" id="wa" target="_blank" rel="noopener" hidden aria-label="Chat via WhatsApp" title="Chat via WhatsApp"></a></span></label>
+      </div>
     </section>
     <section class="sec">
       <h3>Detail pekerjaan</h3>
@@ -416,6 +424,8 @@ const COLS = [['ide','Ide','--s1'],['brief','Brief','--s2'],['kerja','Dikerjakan
 const STAGE = Object.fromEntries(COLS.map(c => [c[0], c]));
 const VIEWS = { ringkasan:['Ringkasan','dash'], board:['Board','board'], proyek:['Semua proyek','list'], keuangan:['Keuangan','wallet'] };
 const $ = s => document.querySelector(s);
+const WA = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 10c0 3 2 5 5 5l1-1.5-2-1-1 .7c-.8-.4-1.4-1-1.800-1.800l.7-1-1-2z"/></svg>';
+const waNum = v => { let d = String(v || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '62' + d.slice(1); else if (d.startsWith('8')) d = '62' + d; return d.length >= 9 ? d : ''; };
 const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => crypto.randomUUID();
@@ -676,14 +686,19 @@ $('#il').addEventListener('click', e => { const d = e.target.closest('[data-di]'
 f.addEventListener('input', e => { if (e.target.classList.contains('rp')) { fmtInput(e.target); sisa(); } });
 f.design_fee.addEventListener('input', totals);
 
+function paintWa() {
+  const n = waNum(f.wa.value), a = $('#wa');
+  a.hidden = !n; if (n) { a.href = 'https://wa.me/' + n + (f.title.value ? '?text=' + encodeURIComponent('Halo' + (f.contact.value ? ' ' + f.contact.value : '') + ', terkait proyek ' + f.title.value.trim()) : ''); a.innerHTML = WA; }
+}
+f.wa.addEventListener('input', paintWa); f.contact.addEventListener('input', paintWa); f.title.addEventListener('input', paintWa);
 function openModal(p) {
-  cur = structuredClone(p || { title: '', client: '', status: 'ide', deadline: null, value: 0, paid: 0, brief: '', links: '', tasks: [], revisions: [], items: [], design_fee: 0 });
+  cur = structuredClone(p || { title: '', client: '', status: 'ide', deadline: null, value: 0, paid: 0, brief: '', links: '', tasks: [], revisions: [], items: [], design_fee: 0, contact: '', wa: '' });
   cur.items ||= []; cur.design_fee ||= 0;
   $('#dt').textContent = p ? 'Edit proyek' : 'Proyek baru';
-  for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links', 'design_fee']) f[k].value = cur[k] ?? '';
+  for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links', 'design_fee', 'contact', 'wa']) f[k].value = cur[k] ?? '';
   for (const k of ['value', 'paid', 'design_fee']) f[k].value = fmt(cur[k]);
   $('#del').hidden = !p;
-  renderSub(); renderItems(); dlg.showModal();
+  renderSub(); renderItems(); paintWa(); dlg.showModal();
 }
 $('#new').onclick = () => openModal();
 $('#cancel').onclick = $('#close').onclick = () => dlg.close();
@@ -701,7 +716,7 @@ f.addEventListener('submit', async e => {
   e.preventDefault();
   const p = { ...cur, title: f.title.value.trim(), client: f.client.value.trim(), status: f.status.value,
     deadline: f.deadline.value || null, value: num(f.value.value), paid: num(f.paid.value),
-    brief: f.brief.value, links: f.links.value,
+    brief: f.brief.value, links: f.links.value, contact: f.contact.value.trim(), wa: f.wa.value.trim(),
     items: cur.items.filter(i => i.name.trim() || +i.price).map(i => ({ ...i, name: i.name.trim() })), design_fee: num(f.design_fee.value) };
   if (p.items.length || p.design_fee) p.value = p.items.reduce((a, i) => a + itemSub(i), 0) + p.design_fee;
   if (!p.id) delete p.id;

@@ -16,12 +16,16 @@ create table if not exists public.projects (
   revisions   jsonb not null default '[]',      -- [{round, note, date}]
   items       jsonb not null default '[]',      -- [{id, name, mode, w, h, qty, price}] detail pekerjaan
   design_fee  bigint not null default 0,        -- biaya desain
+  contact     text,                              -- contact person di klien
+  wa          text,                              -- nomor WhatsApp contact person
   created_at  timestamptz not null default now()
 );
 
 -- Kalau tabel sudah ada, jalankan ini saja:
 alter table public.projects add column if not exists items jsonb not null default '[]';
 alter table public.projects add column if not exists design_fee bigint not null default 0;
+alter table public.projects add column if not exists contact text;
+alter table public.projects add column if not exists wa text;
 
 alter table public.projects enable row level security;
 
