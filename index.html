@@ -31,6 +31,14 @@
   --s1:#6b6b6b;--s2:#1d6fd6;--s3:#0f8f84;--s4:#d9560b;--s5:#7a4fd6;--s6:#16803c;
 }
 [data-theme=light] dialog::backdrop{background:rgba(20,20,20,.35)}
+[data-theme=light] .side{--side:#fbfbf9;color:#555;border-right:1px solid var(--line)}
+[data-theme=light] .brand{color:var(--ink)}
+[data-theme=light] .nav button:hover,[data-theme=light] .side .foot button:hover{background:var(--hover);color:var(--ink)}
+[data-theme=light] .nav button.on{background:#f0ead2;color:var(--ink)}
+[data-theme=light] .side .foot{border-top-color:var(--line)}
+[data-theme=light] .side .foot button{color:#555}
+[data-theme=light] .side .foot small{color:var(--mute)}
+[data-theme=light] .bar{box-shadow:0 1px 0 rgba(0,0,0,.03)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums}
