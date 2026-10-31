@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meja Kerja</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meja Kerja">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,6 +54,7 @@ svg{flex:none;display:block}
 .main{min-width:0;display:flex;flex-direction:column}
 .bar{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
 .bar h1{font-size:20px;font-weight:700;margin-right:auto}
+.net{background:#b45309;color:#fff;text-align:center;padding:6px 12px;font-size:13px}
 .menu{display:none;border:1px solid var(--line);background:none;border-radius:8px;padding:7px}
 .search{position:relative;width:260px}
 .search svg{position:absolute;left:10px;top:9px;color:var(--mute)}
@@ -165,10 +174,12 @@ textarea{min-height:70px;resize:vertical}
     <nav class="nav" id="nav"></nav>
     <div class="foot">
       <small id="who"></small>
+      <button id="inst" hidden><span data-ic="download" data-s="16"></span>Pasang aplikasi</button>
       <button id="out"><span data-ic="logout" data-s="16"></span>Keluar</button>
     </div>
   </aside>
   <div class="main">
+    <div id="net" class="net" hidden>Kamu sedang offline. Data tidak bisa dimuat atau disimpan.</div>
     <header class="bar">
       <button class="menu" id="menu" aria-label="Buka menu"><span data-ic="menu"></span></button>
       <h1 id="title"></h1>
@@ -219,6 +230,7 @@ const I = {
   list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
   wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M16 13h.01"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
+  download:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
   menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
@@ -405,12 +417,23 @@ $('#del').onclick = async () => {
   try { await db.del(cur.id); dlg.close(); render(); } catch (err) { alert(err.message); }
 };
 
+// ---- PWA: status koneksi, tombol pasang, service worker ----
+const setNet = () => { $('#net').hidden = navigator.onLine; };
+addEventListener('offline', setNet);
+addEventListener('online', () => { setNet(); if (sb && !$('#app').hidden) refresh(); });
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#inst').hidden = false; });
+$('#inst').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#inst').hidden = true; };
+addEventListener('appinstalled', () => { $('#inst').hidden = true; });
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+
 // ---- auth & start ----
 async function refresh() { try { projects = await db.load(); render(); } catch (err) { console.error(err); } }
 async function start(email) {
   try { projects = await db.load(); } catch (err) { alert('Gagal memuat data: ' + err.message); }
   $('#auth').hidden = true; $('#app').hidden = false;
   $('#who').textContent = email;
+  setNet();
   paintIcons(); render();
 }
 $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
@@ -424,7 +447,7 @@ $('#auth').addEventListener('submit', async e => {
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#app').hidden && !dlg.open) refresh(); });
 (async () => {
   paintIcons();
-  if (!(await initCloud())) { $('#cfg').hidden = false; $('#auth').hidden = false; return; }
+  if (!(await initCloud())) { if (!navigator.onLine) $('#cfg').textContent = 'Tidak ada koneksi internet. Sambungkan lalu muat ulang halaman.'; $('#cfg').hidden = false; $('#auth').hidden = false; return; }
   const { data } = await sb.auth.getSession();
   data.session ? start(data.session.user.email) : $('#auth').hidden = false;
 })();
