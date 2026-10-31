@@ -64,7 +64,35 @@ svg{flex:none;display:block}
 #view{padding:16px 20px 32px}
 
 /* generic */
-.grid2{display:grid;grid-template-columns:3fr 2fr;gap:12px;align-items:start}
+.hd{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.hd b{font-size:15px;font-weight:700}
+.hd small{margin-left:auto;color:var(--mute);font-size:12px}
+.neg{color:var(--red)}
+.stat.warn b{color:var(--red)}
+.stat.warn svg{color:var(--red)}
+.ph small{color:var(--mute);font-size:12px}
+.ag{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
+.ag .d{border:1px solid var(--line);border-radius:6px;text-align:center;padding:4px 0 3px}
+.ag .d small{display:block;color:var(--mute);font-size:11px}
+.ag .d b{display:block;font-size:13px;font-weight:700}
+.ag .d i{display:block;font-style:normal;font-size:11px;font-weight:700;min-height:14px}
+.ag .d.we{background:var(--hover)}
+.ag .d.has{background:var(--acc);border-color:var(--acc);color:#000}
+.ag .d.has small{color:#000}
+.ag .d.today{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.dash{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px;align-items:start}
+.stack{display:grid;gap:12px}
+.seg{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden;background:var(--line);margin:4px 0 10px}
+.seg span{background:var(--c)}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
+.lg div{display:flex;align-items:center;gap:7px;font-size:12.5px}
+.lg i{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.lg em{margin-left:auto;font-style:normal;color:var(--mute)}
+.fin{display:flex;justify-content:space-between;padding:3px 0}
+.fin span{color:var(--mute)}
+.fin b{font-weight:700}
+.fb{margin:8px 0 4px}
+.dl .ago{color:var(--mute);font-size:12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
 .panel h2{font-size:13px;font-weight:700;margin-bottom:8px}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
@@ -90,8 +118,6 @@ svg{flex:none;display:block}
 .dl .t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dl .t b{font-weight:600}
 .dl .t small{color:var(--mute);font-size:12px;margin-left:8px}
-.stage{display:grid;grid-template-columns:116px 1fr 20px;gap:10px;align-items:center;margin:8px 0;font-size:12.5px}
-.stage em{font-style:normal;color:var(--mute);text-align:right}
 .empty{color:var(--mute);padding:10px 4px;font-size:12.5px}
 
 /* board */
@@ -156,7 +182,8 @@ textarea{min-height:56px;resize:vertical}
   .bar{padding:8px 12px;height:auto;flex-wrap:wrap}
   .search{order:5;width:100%}
   #view{padding:12px}
-  .grid2,.row,.row3{grid-template-columns:1fr}
+  .dash,.row,.row3{grid-template-columns:1fr}
+  .ag{grid-template-columns:repeat(7,minmax(0,1fr))}
   .dl{grid-template-columns:84px minmax(0,1fr)}
   .dl .st{display:none}
   .strip{grid-template-columns:1fr 1fr}
@@ -242,6 +269,7 @@ const I = {
   list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
   wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M16 13h.01"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
   download:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
@@ -309,21 +337,59 @@ function dlChip(p) {
 }
 
 // ---- views ----
+const ago = iso => { const d = Math.round((new Date().setHours(0,0,0,0) - new Date(iso).setHours(0,0,0,0)) / 864e5); return d <= 0 ? 'hari ini' : d + ' hari lalu'; };
+
 function vRingkasan() {
   const active = projects.filter(p => p.status !== 'selesai');
-  const soon = active.filter(p => { const d = daysLeft(p.deadline); return d !== null && d <= 7; }).length;
+  const dl = p => daysLeft(p.deadline);
+  const late = active.filter(p => dl(p) !== null && dl(p) < 0).length;
+  const urgent = active.filter(p => dl(p) !== null && dl(p) >= 0 && dl(p) <= 3).length;
+  const soon = active.filter(p => dl(p) !== null && dl(p) >= 0 && dl(p) <= 7).length;
   const wait = projects.filter(p => p.status === 'approval').length;
-  const owed = projects.filter(p => p.status !== 'ide').reduce((s, p) => s + Math.max(0, p.value - p.paid), 0);
-  const stats = [['folder', active.length, 'Proyek aktif'], ['clock', soon, 'Deadline dalam 7 hari'], ['send', wait, 'Menunggu approval'], ['wallet', rp(owed), 'Belum dibayar klien']];
+  const run = projects.filter(p => p.status !== 'ide');
+  const tv = run.reduce((s, p) => s + p.value, 0), tp = run.reduce((s, p) => s + p.paid, 0);
+  const owed = run.reduce((s, p) => s + Math.max(0, p.value - p.paid), 0);
+  const pct = tv ? Math.min(100, Math.round(tp / tv * 100)) : 0;
+
+  const head = !projects.length ? 'Belum ada proyek. Klik Proyek baru untuk memulai.'
+    : (late || urgent) ? [late ? `<span class="neg">${late} proyek telat</span>` : '', urgent ? `${urgent} deadline dalam 3 hari` : ''].filter(Boolean).join(', ')
+    : 'Tidak ada deadline mendesak';
+  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const stats = [['folder', active.length, 'Proyek aktif', ''], ['clock', soon, 'Deadline 7 hari', ''],
+    ['alert', late, 'Telat', late ? 'warn' : ''], ['send', wait, 'Menunggu approval', ''], ['wallet', rp(owed), 'Belum dibayar', '']];
+
+  const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() + i); return d; });
+  const byDay = days.map(() => []);
+  active.forEach(p => { const n = dl(p); if (n !== null && n >= 0 && n < 14) byDay[n].push(p.title); });
+  const fmt = d => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
   const next = visible().filter(p => p.status !== 'selesai' && p.deadline).sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 8);
-  const max = Math.max(1, ...COLS.map(c => projects.filter(p => p.status === c[0]).length));
-  return `<div class="strip">${stats.map(s => `<div class="stat">${ic(s[0])}<div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
-  <div class="grid2">
+  const revs = projects.flatMap(p => p.revisions.map(r => ({ p, r }))).filter(x => x.r.date)
+    .sort((a, b) => b.r.date.localeCompare(a.r.date)).slice(0, 4);
+  const cnt = COLS.map(c => projects.filter(p => p.status === c[0]).length);
+
+  return `<div class="hd"><b>${head}</b><small>${today}</small></div>
+  <div class="strip">${stats.map(s => `<div class="stat ${s[3]}">${ic(s[0])}<div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
+  <div class="panel" style="margin-bottom:12px"><div class="ph"><h2>14 hari ke depan</h2><small>${fmt(days[0])} - ${fmt(days[13])}</small></div>
+    <div class="ag">${days.map((d, i) => { const n = byDay[i].length;
+      return `<div class="d${n ? ' has' : ''}${i === 0 ? ' today' : ''}${[0, 6].includes(d.getDay()) ? ' we' : ''}" title="${esc(byDay[i].join(', ') || 'Tidak ada deadline')}"><small>${d.toLocaleDateString('id-ID', { weekday: 'short' })}</small><b>${d.getDate()}</b><i>${n || ''}</i></div>`; }).join('')}</div></div>
+  <div class="dash">
     <div class="panel"><div class="ph"><h2>Deadline terdekat</h2><button class="lnk" data-go="proyek">Lihat semua</button></div>
       <div class="dls">${next.map(p =>
       `<div class="dl" data-open="${p.id}" tabindex="0"><span>${dlChip(p)}</span><span class="t"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}</span><span class="st">${badge(p)}</span></div>`).join('') || '<div class="empty">Belum ada proyek dengan deadline.</div>'}</div></div>
-    <div class="panel"><h2>Proyek per tahap</h2>${COLS.map(c => { const n = projects.filter(p => p.status === c[0]).length;
-      return `<div class="stage"><span>${c[1]}</span><div class="bar2" style="--c:var(${c[2]})"><span style="width:${n / max * 100}%"></span></div><em>${n}</em></div>`; }).join('')}</div>
+    <div class="stack">
+      <div class="panel"><h2>Pipeline</h2>
+        <div class="seg">${COLS.map((c, i) => cnt[i] ? `<span style="flex:${cnt[i]};--c:var(${c[2]})"></span>` : '').join('')}</div>
+        <div class="lg">${COLS.map((c, i) => `<div style="--c:var(${c[2]})"><i></i>${c[1]}<em>${cnt[i]}</em></div>`).join('')}</div></div>
+      <div class="panel"><h2>Keuangan proyek berjalan</h2>
+        <div class="fin"><span>Total nilai</span><b>${rp(tv)}</b></div>
+        <div class="fin"><span>Sudah dibayar</span><b>${rp(tp)}</b></div>
+        <div class="fin"><span>Belum dibayar</span><b>${rp(owed)}</b></div>
+        <div class="bar2 fb"><span style="width:${pct}%"></span></div><small style="color:var(--mute)">${pct}% terbayar</small></div>
+      <div class="panel"><h2>Revisi terbaru</h2>
+        <div class="dls">${revs.map(x =>
+        `<div class="dl" data-open="${x.p.id}" tabindex="0"><span><span class="chip">Ronde ${x.r.round}</span></span><span class="t"><b>${esc(x.p.title)}</b><small>${esc(x.r.note)}</small></span><span class="st ago">${ago(x.r.date)}</span></div>`).join('') || '<div class="empty">Belum ada revisi tercatat.</div>'}</div></div>
+    </div>
   </div>`;
 }
 
