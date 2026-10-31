@@ -153,7 +153,7 @@ textarea{min-height:70px;resize:vertical}
 
 <form id="auth" hidden>
   <h1>Masuk ke Meja Kerja</h1>
-  <p id="cfg" hidden style="color:var(--red);font-size:13px">Penyimpanan cloud belum dikonfigurasi. Isi CLOUD_URL dan CLOUD_KEY di bagian atas script index.html.</p>
+  <p id="cfg" hidden style="color:var(--red);font-size:13px">Penyimpanan cloud belum dikonfigurasi. Atur Environment Variables CLOUD_URL dan CLOUD_KEY di Vercel, lalu deploy ulang.</p>
   <label>Email<input id="em" type="email" required autocomplete="username"></label>
   <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
   <button class="btn primary" style="justify-content:center">Masuk</button>
@@ -213,11 +213,6 @@ textarea{min-height:70px;resize:vertical}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-// ====== Isi dua nilai ini dari pengaturan API layanan cloud-mu ======
-const CLOUD_URL = 'https://tonskeloouigcfviswak.supabase.co';
-const CLOUD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvbnNrZWxvb3VpZ2Nmdmlzd2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTg3MDAsImV4cCI6MjEwODk3NDcwMH0.8l2Zo8FdsnOJX5go3WXHeRBSkgDeSDZN62T7B0Ur9IE';
-// =====================================================================
-
 const I = {
   dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   board:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v11"/>',
@@ -245,8 +240,17 @@ const $ = s => document.querySelector(s);
 const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => crypto.randomUUID();
-const ready = !!(CLOUD_URL && CLOUD_KEY);
-const sb = ready ? supabase.createClient(CLOUD_URL, CLOUD_KEY) : null;
+let sb = null;
+// Kredensial dibaca dari /api/config (Environment Variables di Vercel), bukan ditulis di file ini.
+async function initCloud() {
+  try {
+    const r = await fetch('/api/config', { cache: 'no-store' });
+    if (!r.ok) return false;
+    const c = await r.json();
+    sb = supabase.createClient(c.url, c.key);
+    return true;
+  } catch { return false; }
+}
 let projects = [], cur = null, view = 'ringkasan', q = '', fs = '';
 
 const db = {
@@ -412,7 +416,7 @@ async function start(email) {
 $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 $('#auth').addEventListener('submit', async e => {
   e.preventDefault();
-  if (!ready) return;
+  if (!sb) return;
   const { data, error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
   error ? alert('Login gagal: ' + error.message) : start(data.user.email);
 });
@@ -420,7 +424,7 @@ $('#auth').addEventListener('submit', async e => {
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#app').hidden && !dlg.open) refresh(); });
 (async () => {
   paintIcons();
-  if (!ready) { $('#cfg').hidden = false; $('#auth').hidden = false; return; }
+  if (!(await initCloud())) { $('#cfg').hidden = false; $('#auth').hidden = false; return; }
   const { data } = await sb.auth.getSession();
   data.session ? start(data.session.user.email) : $('#auth').hidden = false;
 })();
