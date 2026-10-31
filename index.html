@@ -6,6 +6,7 @@
 <title>Meja Kerja</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#000000">
+<script>try{var t=localStorage.getItem("tema");if(t==="light")document.documentElement.dataset.theme="light"}catch(e){}</script>
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,6 +24,13 @@
   --s1:#8a8a8a;--s2:#5aa9ff;--s3:#2fc6b8;--s4:#ff8a3d;--s5:#b48cff;--s6:#5ed38a;
   --side:#000;
 }
+[data-theme=light]{
+  color-scheme:light;
+  --bg:#f4f4f1;--panel:#fff;--ink:#161616;--mute:#666;--line:#dcdcd6;--hover:#efefea;
+  --acc:#b58a00;--on-acc:#000;--red:#d92d20;--amber:#b58a00;--green:#16803c;
+  --s1:#6b6b6b;--s2:#1d6fd6;--s3:#0f8f84;--s4:#d9560b;--s5:#7a4fd6;--s6:#16803c;
+}
+[data-theme=light] dialog::backdrop{background:rgba(20,20,20,.35)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums}
@@ -220,6 +228,7 @@ input[readonly]{background:var(--hover)}
     <div class="foot">
       <small id="who"></small>
       <button id="inst" hidden><span data-ic="download" data-s="16"></span>Pasang aplikasi</button>
+      <button id="tema"></button>
       <button id="out"><span data-ic="logout" data-s="16"></span>Keluar</button>
     </div>
   </aside>
@@ -300,6 +309,8 @@ const I = {
   send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
   link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
   palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 22a10 10 0 1 1 10-10c0 2.5-2 3-4 3h-2a2 2 0 0 0-1.5 3.3c.9 1 .2 3.7-2.5 3.7z"/>'
 };
 const ic = (n, s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
@@ -586,6 +597,19 @@ $('#auth').addEventListener('submit', async e => {
   const { data, error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
   error ? alert('Login gagal: ' + error.message) : start(data.user.email);
 });
+// tema terang / gelap
+function paintTema() {
+  const light = document.documentElement.dataset.theme === 'light';
+  $('#tema').innerHTML = ic(light ? 'moon' : 'sun', 16) + (light ? 'Mode gelap' : 'Mode terang');
+  document.querySelector('meta[name=theme-color]').content = light ? '#f4f4f1' : '#000000';
+}
+$('#tema').onclick = () => {
+  const light = document.documentElement.dataset.theme !== 'light';
+  light ? document.documentElement.dataset.theme = 'light' : delete document.documentElement.dataset.theme;
+  try { localStorage.setItem('tema', light ? 'light' : 'dark'); } catch {}
+  paintTema();
+};
+paintTema();
 // sinkron antar perangkat: muat ulang data saat tab kembali dibuka
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#app').hidden && !dlg.open) refresh(); });
 (async () => {
