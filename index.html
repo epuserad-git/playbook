@@ -165,13 +165,25 @@ td.n,th.n{text-align:right}
 td small{display:block;color:var(--mute);font-size:12px}
 
 /* modal */
-dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);width:min(600px,94vw);padding:0;max-height:92vh}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);width:min(660px,94vw);padding:0;max-height:92vh;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+dialog[open]{display:flex;flex-direction:column}
 dialog::backdrop{background:rgba(8,12,22,.55)}
-.dh{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
-.dh h2{font-size:15px;flex:1}
+.dh{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);flex:none}
+.dh h2{font-size:16px;flex:1}
 .x{border:0;background:none;color:var(--mute);padding:3px;border-radius:5px}
 .x:hover{background:var(--hover)}
-form{display:grid;gap:10px;padding:16px}
+form{display:flex;flex-direction:column;min-height:0;flex:1}
+.fb{overflow:auto;padding:4px 18px 18px;display:grid;gap:0}
+.sec{display:grid;gap:10px;padding:16px 0;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec>h3,.sub h3{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.sub{border-top:0;padding-top:0}
+.addit{justify-self:start}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[readonly]{color:var(--mute)}
+input::placeholder,textarea::placeholder{color:var(--mute);opacity:.6}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
 label{display:grid;gap:4px;font-weight:600;font-size:12px}
 input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 9px;width:100%;font-weight:400;font-size:13px}
 textarea{min-height:56px;resize:vertical}
@@ -193,16 +205,21 @@ select option:checked{background:var(--acc);color:#000}
 .item.done span{text-decoration:line-through;color:var(--mute)}
 .add{display:flex;gap:6px;margin-top:6px}
 .lk a{display:flex;gap:6px;align-items:center;color:var(--acc);overflow-wrap:anywhere;font-size:12px}
-.actions{display:flex;gap:8px;justify-content:flex-end}
-.it{border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;display:grid;gap:6px}
+.actions{display:flex;gap:8px;align-items:center;padding:12px 18px;border-top:1px solid var(--line);background:var(--panel);flex:none}
+.actions .sp{flex:1}
+.it{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:8px;background:color-mix(in srgb,var(--hover) 50%,transparent)}
 .it .r1{display:grid;grid-template-columns:1fr 130px auto;gap:6px;align-items:center}
 .it .r2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .it .r2 label{font-weight:500;color:var(--mute);font-size:11px}
 .it .r3{text-align:right;font-size:12px;color:var(--mute)}
 .it .r3 b{color:var(--ink);font-size:13px}
-.calc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;align-items:end}
-.calc .tot{text-align:right;font-size:12px;color:var(--mute);line-height:1.5}
-.calc .tot b{display:block;color:var(--ink);font-size:15px}
+.calc{display:grid;grid-template-columns:1fr 1.3fr;gap:12px;align-items:end;background:var(--hover);border-radius:8px;padding:10px 12px}
+.calc .tot{display:grid;gap:2px;text-align:right;font-size:12px;color:var(--mute)}
+.calc .tot span{display:flex;justify-content:space-between;gap:10px}
+.calc .tot b{color:var(--ink);font-weight:600}
+.calc .gt{font-size:13px;color:var(--ink);padding-top:3px;border-top:1px solid var(--line)}
+.calc .gt b{font-size:16px;font-weight:700}
+.calc input{background:var(--panel)}
 input[readonly]{background:var(--hover)}
 
 /* auth */
@@ -218,6 +235,10 @@ input[readonly]{background:var(--hover)}
   .search{order:5;width:100%}
   #view{padding:12px}
   .dash,.row,.row3{grid-template-columns:1fr}
+  .it .r1{grid-template-columns:1fr auto}.it .r1 select{grid-column:1/-1;order:3}
+  .it .r2{grid-template-columns:1fr 1fr}
+  .calc{grid-template-columns:1fr}
+  dialog{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;border:0}
   .ag{grid-template-columns:repeat(7,minmax(0,1fr))}
   .dl{grid-template-columns:84px minmax(0,1fr)}
   .dl .st{display:none}
@@ -264,47 +285,62 @@ input[readonly]{background:var(--hover)}
 <dialog id="dlg">
   <div class="dh"><h2 id="dt">Proyek</h2><button type="button" class="x" id="close" aria-label="Tutup"><span data-ic="x"></span></button></div>
   <form id="f" method="dialog">
-    <label>Judul<input name="title" required></label>
-    <div class="row">
-      <label>Klien<input name="client"></label>
-      <label>Tahap<select name="status"></select></label>
-    </div>
-    <div class="row3">
-      <label>Deadline<input name="deadline" type="date"></label>
-      <label>Nilai (Rp)<input name="value" class="rp" inputmode="numeric" autocomplete="off"></label>
-      <label>Dibayar (Rp)<input name="paid" class="rp" inputmode="numeric" autocomplete="off"></label>
-    </div>
-    <div class="row">
-      <label>Brief<textarea name="brief"></textarea></label>
-      <label>Link file (satu per baris)<textarea name="links" placeholder="https://..."></textarea></label>
-    </div>
-    <div class="lk" id="lk"></div>
-    <div class="sub">
+    <div class="fb">
+    <section class="sec">
+      <h3>Info proyek</h3>
+      <label>Judul<input name="title" required placeholder="mis. Banner Promo Umroh Desember"></label>
+      <div class="row3">
+        <label>Klien<input name="client" placeholder="Nama klien"></label>
+        <label>Tahap<select name="status"></select></label>
+        <label>Deadline<input name="deadline" type="date"></label>
+      </div>
+    </section>
+    <section class="sec">
       <h3>Detail pekerjaan</h3>
       <div id="il"></div>
-      <div class="add"><button type="button" class="btn" id="ia"><span data-ic="plus" data-s="14"></span>Tambah item</button></div>
+      <button type="button" class="btn addit" id="ia"><span data-ic="plus" data-s="14"></span>Tambah item</button>
       <div class="calc">
-        <label>Biaya desain (Rp)<input name="design_fee" class="rp" inputmode="numeric" autocomplete="off"></label>
-        <div class="tot">Subtotal item: <span id="isum">Rp 0</span><b id="itot">Rp 0</b></div>
+        <label>Biaya desain (Rp)<input name="design_fee" class="rp" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+        <div class="tot"><span>Subtotal item <b id="isum">Rp 0</b></span><span class="gt">Total<b id="itot">Rp 0</b></span></div>
       </div>
-    </div>
-    <datalist id="jenis"><option>Banner</option><option>Spanduk</option><option>X-Banner</option><option>Roll Banner</option><option>Stiker</option><option>Backdrop</option><option>Brosur</option><option>Kartu nama</option><option>Logo</option></datalist>
-    <div class="row subs">
-    <div class="sub">
-      <h3>Checklist</h3><div id="tl"></div>
-      <div class="add"><input id="tn" placeholder="Tambah langkah, mis. Sketsa awal"><button type="button" class="btn" id="ta">Tambah</button></div>
-    </div>
-    <div class="sub">
-      <h3>Revisi</h3><div id="rl"></div>
-      <div class="add"><input id="rn" placeholder="Catatan feedback ronde berikutnya"><button type="button" class="btn" id="ra">Catat revisi</button></div>
-    </div>
+    </section>
+    <section class="sec">
+      <h3>Keuangan</h3>
+      <div class="row3">
+        <label>Nilai proyek (Rp)<input name="value" class="rp" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+        <label>Dibayar (Rp)<input name="paid" class="rp" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+        <label>Sisa (Rp)<input id="sisa" readonly tabindex="-1" placeholder="0"></label>
+      </div>
+    </section>
+    <section class="sec">
+      <h3>Catatan</h3>
+      <div class="row">
+        <label>Brief<textarea name="brief" placeholder="Ringkasan permintaan klien"></textarea></label>
+        <label>Link file (satu per baris)<textarea name="links" placeholder="https://..."></textarea></label>
+      </div>
+      <div class="lk" id="lk"></div>
+    </section>
+    <section class="sec">
+      <div class="row subs">
+        <div class="sub">
+          <h3>Checklist</h3><div id="tl"></div>
+          <div class="add"><input id="tn" placeholder="Tambah langkah, mis. Sketsa awal"><button type="button" class="btn" id="ta">Tambah</button></div>
+        </div>
+        <div class="sub">
+          <h3>Revisi</h3><div id="rl"></div>
+          <div class="add"><input id="rn" placeholder="Catatan feedback ronde berikutnya"><button type="button" class="btn" id="ra">Catat</button></div>
+        </div>
+      </div>
+    </section>
     </div>
     <div class="actions">
       <button type="button" class="btn danger" id="del" hidden><span data-ic="trash" data-s="16"></span>Hapus</button>
+      <span class="sp"></span>
       <button type="button" class="btn" id="cancel">Batal</button>
       <button class="btn primary">Simpan</button>
     </div>
   </form>
+<datalist id="jenis"><option>Banner</option><option>Spanduk</option><option>X-Banner</option><option>Roll Banner</option><option>Stiker</option><option>Backdrop</option><option>Brosur</option><option>Kartu nama</option><option>Logo</option></datalist>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -527,12 +563,14 @@ const itemArea = i => (+i.w || 0) * (+i.h || 0) / 1e4;
 function totals() {
   const sum = cur.items.reduce((a, i) => a + itemSub(i), 0);
   const total = sum + num(f.design_fee.value);
-  $('#isum').textContent = rp(sum); $('#itot').textContent = 'Total ' + rp(total);
+  $('#isum').textContent = rp(sum); $('#itot').textContent = rp(total);
   const auto = cur.items.length > 0 || num(f.design_fee.value) > 0;
   f.value.readOnly = auto;
   if (auto) f.value.value = fmt(total);
+  sisa();
   return total;
 }
+function sisa() { $('#sisa').value = fmt(Math.max(0, num(f.value.value) - num(f.paid.value))); }
 function renderItems() {
   $('#il').innerHTML = cur.items.map((i, n) => {
     const area = i.mode !== 'unit';
@@ -559,7 +597,7 @@ $('#il').addEventListener('input', e => {
   row.querySelector('[data-s]').textContent = rp(itemSub(i)); totals();
 });
 $('#il').addEventListener('click', e => { const d = e.target.closest('[data-di]'); if (d) { cur.items.splice(+d.dataset.di, 1); renderItems(); } });
-f.addEventListener('input', e => { if (e.target.classList.contains('rp')) fmtInput(e.target); });
+f.addEventListener('input', e => { if (e.target.classList.contains('rp')) { fmtInput(e.target); sisa(); } });
 f.design_fee.addEventListener('input', totals);
 
 function openModal(p) {
