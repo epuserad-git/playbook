@@ -14,8 +14,14 @@ create table if not exists public.projects (
   links       text,
   tasks       jsonb not null default '[]',      -- [{id, title, done}]
   revisions   jsonb not null default '[]',      -- [{round, note, date}]
+  items       jsonb not null default '[]',      -- [{id, name, mode, w, h, qty, price}] detail pekerjaan
+  design_fee  bigint not null default 0,        -- biaya desain
   created_at  timestamptz not null default now()
 );
+
+-- Kalau tabel sudah ada, jalankan ini saja:
+alter table public.projects add column if not exists items jsonb not null default '[]';
+alter table public.projects add column if not exists design_fee bigint not null default 0;
 
 alter table public.projects enable row level security;
 

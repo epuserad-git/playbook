@@ -21,3 +21,7 @@ Satu file HTML + vanilla JS. Semua data tersimpan di cloud dan sinkron antar per
 Aplikasi bisa dipasang ke layar utama (Chrome/Edge: tombol "Pasang aplikasi" di sidebar; iOS: Share > Add to Home Screen).
 Service worker (`sw.js`) hanya menyimpan cangkang aplikasi. Data dan kredensial selalu diambil dari jaringan, jadi aplikasi butuh internet untuk memuat dan menyimpan proyek.
 Saat mengubah `index.html`, naikkan `VER` di `sw.js` kalau ingin memaksa cache lama terhapus.
+
+## Detail pekerjaan
+
+Di form proyek ada bagian *Detail pekerjaan*: tambah item (mis. Banner), isi panjang × lebar (cm), jumlah, dan harga per m². Biaya desain diisi terpisah. Nilai proyek dihitung otomatis: Σ(m² × jumlah × harga) + biaya desain. Item bisa juga dihitung *Satuan* (jumlah × harga). Untuk database yang sudah ada, jalankan dua baris `alter table` di `schema.sql`.

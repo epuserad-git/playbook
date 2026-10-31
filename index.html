@@ -169,6 +169,16 @@ textarea{min-height:56px;resize:vertical}
 .add{display:flex;gap:6px;margin-top:6px}
 .lk a{display:flex;gap:6px;align-items:center;color:var(--acc);overflow-wrap:anywhere;font-size:12px}
 .actions{display:flex;gap:8px;justify-content:flex-end}
+.it{border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;display:grid;gap:6px}
+.it .r1{display:grid;grid-template-columns:1fr 130px auto;gap:6px;align-items:center}
+.it .r2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.it .r2 label{font-weight:500;color:var(--mute);font-size:11px}
+.it .r3{text-align:right;font-size:12px;color:var(--mute)}
+.it .r3 b{color:var(--ink);font-size:13px}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;align-items:end}
+.calc .tot{text-align:right;font-size:12px;color:var(--mute);line-height:1.5}
+.calc .tot b{display:block;color:var(--ink);font-size:15px}
+input[readonly]{background:var(--hover)}
 
 /* auth */
 #auth{max-width:340px;margin:12vh auto;padding:22px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
@@ -243,6 +253,16 @@ textarea{min-height:56px;resize:vertical}
       <label>Link file (satu per baris)<textarea name="links" placeholder="https://..."></textarea></label>
     </div>
     <div class="lk" id="lk"></div>
+    <div class="sub">
+      <h3>Detail pekerjaan</h3>
+      <div id="il"></div>
+      <div class="add"><button type="button" class="btn" id="ia"><span data-ic="plus" data-s="14"></span>Tambah item</button></div>
+      <div class="calc">
+        <label>Biaya desain (Rp)<input name="design_fee" type="number" min="0" step="1000"></label>
+        <div class="tot">Subtotal item: <span id="isum">Rp 0</span><b id="itot">Rp 0</b></div>
+      </div>
+    </div>
+    <datalist id="jenis"><option>Banner</option><option>Spanduk</option><option>X-Banner</option><option>Roll Banner</option><option>Stiker</option><option>Backdrop</option><option>Brosur</option><option>Kartu nama</option><option>Logo</option></datalist>
     <div class="row subs">
     <div class="sub">
       <h3>Checklist</h3><div id="tl"></div>
@@ -464,12 +484,54 @@ function renderSub() {
     .map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${ic('link', 14)}${esc(u)}</a>`).join('');
 }
 
+// ---- detail pekerjaan (item + biaya desain) ----
+// Item ukuran: (panjang cm x lebar cm / 10.000) = m2, dikali jumlah, dikali harga per m2. Item satuan: jumlah x harga.
+const itemSub = i => Math.round((i.mode === 'unit' ? 1 : (+i.w || 0) * (+i.h || 0) / 1e4) * (+i.qty || 0) * (+i.price || 0));
+const itemArea = i => (+i.w || 0) * (+i.h || 0) / 1e4;
+function totals() {
+  const sum = cur.items.reduce((a, i) => a + itemSub(i), 0);
+  const total = sum + (+f.design_fee.value || 0);
+  $('#isum').textContent = rp(sum); $('#itot').textContent = 'Total ' + rp(total);
+  const auto = cur.items.length > 0 || (+f.design_fee.value || 0) > 0;
+  f.value.readOnly = auto;
+  if (auto) f.value.value = total;
+  return total;
+}
+function renderItems() {
+  $('#il').innerHTML = cur.items.map((i, n) => {
+    const area = i.mode !== 'unit';
+    return `<div class="it" data-n="${n}">
+      <div class="r1"><input data-k="name" list="jenis" placeholder="Jenis pekerjaan, mis. Banner" value="${esc(i.name)}" aria-label="Jenis pekerjaan">
+        <select data-k="mode" aria-label="Cara hitung"><option value="area" ${area ? 'selected' : ''}>Ukuran (m²)</option><option value="unit" ${area ? '' : 'selected'}>Satuan</option></select>
+        <button type="button" class="x" data-di="${n}" aria-label="Hapus item">${ic('x', 16)}</button></div>
+      <div class="r2">
+        ${area ? `<label>Panjang (cm)<input data-k="w" type="number" min="0" value="${i.w ?? ''}"></label><label>Lebar (cm)<input data-k="h" type="number" min="0" value="${i.h ?? ''}"></label>` : ''}
+        <label>Jumlah<input data-k="qty" type="number" min="0" value="${i.qty ?? 1}"></label>
+        <label>${area ? 'Harga per m² (Rp)' : 'Harga satuan (Rp)'}<input data-k="price" type="number" min="0" step="500" value="${i.price ?? ''}"></label>
+      </div>
+      <div class="r3">${area ? `<span data-a>${itemArea(i).toLocaleString('id-ID')} m² × ${+i.qty || 0} × ${rp(i.price)} = </span>` : ''}<b data-s>${rp(itemSub(i))}</b></div></div>`;
+  }).join('');
+  totals();
+}
+$('#ia').onclick = () => { cur.items.push({ id: uid(), name: '', mode: 'area', w: '', h: '', qty: 1, price: '' }); renderItems(); };
+$('#il').addEventListener('input', e => {
+  const k = e.target.dataset.k, row = e.target.closest('[data-n]'); if (!k || !row) return;
+  const i = cur.items[+row.dataset.n]; i[k] = e.target.value;
+  if (k === 'mode') { renderItems(); return; }
+  const a = row.querySelector('[data-a]');
+  if (a) a.textContent = `${itemArea(i).toLocaleString('id-ID')} m² × ${+i.qty || 0} × ${rp(i.price)} = `;
+  row.querySelector('[data-s]').textContent = rp(itemSub(i)); totals();
+});
+$('#il').addEventListener('click', e => { const d = e.target.closest('[data-di]'); if (d) { cur.items.splice(+d.dataset.di, 1); renderItems(); } });
+f.design_fee.addEventListener('input', totals);
+
 function openModal(p) {
-  cur = structuredClone(p || { title: '', client: '', status: 'ide', deadline: null, value: 0, paid: 0, brief: '', links: '', tasks: [], revisions: [] });
+  cur = structuredClone(p || { title: '', client: '', status: 'ide', deadline: null, value: 0, paid: 0, brief: '', links: '', tasks: [], revisions: [], items: [], design_fee: 0 });
+  cur.items ||= []; cur.design_fee ||= 0;
   $('#dt').textContent = p ? 'Edit proyek' : 'Proyek baru';
-  for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links']) f[k].value = cur[k] ?? '';
+  for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links', 'design_fee']) f[k].value = cur[k] ?? '';
   $('#del').hidden = !p;
-  renderSub(); dlg.showModal();
+  renderSub(); renderItems(); dlg.showModal();
 }
 $('#new').onclick = () => openModal();
 $('#cancel').onclick = $('#close').onclick = () => dlg.close();
@@ -487,7 +549,9 @@ f.addEventListener('submit', async e => {
   e.preventDefault();
   const p = { ...cur, title: f.title.value.trim(), client: f.client.value.trim(), status: f.status.value,
     deadline: f.deadline.value || null, value: +f.value.value || 0, paid: +f.paid.value || 0,
-    brief: f.brief.value, links: f.links.value };
+    brief: f.brief.value, links: f.links.value,
+    items: cur.items.filter(i => i.name.trim() || +i.price).map(i => ({ ...i, name: i.name.trim() })), design_fee: +f.design_fee.value || 0 };
+  if (p.items.length || p.design_fee) p.value = p.items.reduce((a, i) => a + itemSub(i), 0) + p.design_fee;
   if (!p.id) delete p.id;
   try { await db.save(p); dlg.close(); render(); } catch (err) { alert('Gagal menyimpan: ' + err.message); }
 });
