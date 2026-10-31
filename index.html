@@ -152,18 +152,27 @@ svg{flex:none;display:block}
 .empty{color:var(--mute);padding:10px 4px;font-size:12.5px}
 
 /* board */
-.board{display:flex;gap:10px;overflow-x:auto;align-items:flex-start;padding-bottom:6px}
-.col{flex:0 0 250px;background:color-mix(in srgb,var(--line) 40%,transparent);border-radius:8px;padding:8px;min-height:120px}
-.col.over{outline:2px dashed var(--acc);outline-offset:-2px}
-.col h3{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:7px;padding:2px 4px 8px}
-.col h3 i{width:7px;height:7px;border-radius:50%;background:var(--c)}
-.col h3 em{margin-left:auto;font-style:normal;font-weight:600;color:var(--mute);font-size:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--c);border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:grab}
-.card:hover{border-color:var(--acc);border-left-color:var(--c)}
-.card b{display:block;font-weight:600}
-.card small{color:var(--mute);font-size:12px}
-.meta{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 0}
-.card .bar2{margin-top:7px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;align-items:start;padding-bottom:8px;height:calc(100vh - 130px);min-height:360px}
+.col{display:flex;flex-direction:column;max-height:100%;background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:10px;border-top:3px solid var(--c);transition:background .15s}
+.col.over{background:color-mix(in srgb,var(--acc) 14%,transparent);box-shadow:inset 0 0 0 2px var(--acc)}
+.ch{padding:10px 12px 6px;flex:none}
+.ch h3{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:7px}
+.ch h3 i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.ch h3 em{font-style:normal;font-weight:700;color:var(--mute);font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:0 7px;line-height:18px}
+.ch h3 .x{margin-left:auto}
+.ch small{color:var(--mute);font-size:12px}
+.cl{display:grid;gap:8px;padding:6px 8px 10px;overflow-y:auto;align-content:start;min-height:80px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 11px;cursor:grab;display:grid;gap:6px;transition:border-color .15s,box-shadow .15s,transform .15s}
+.card:hover{border-color:var(--mute);box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.card.dragging{opacity:.4;transform:scale(.97)}
+.card>b{font-weight:600;font-size:13px;line-height:1.35}
+.card>small{color:var(--mute);font-size:12px;margin-top:-4px}
+.card .prog{display:flex;align-items:center;gap:8px}
+.card .prog .bar2{flex:1}
+.card .prog em{font-style:normal;font-size:11px;font-weight:600;color:var(--mute)}
+.card .cf{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-top:7px;border-top:1px solid var(--line)}
+.card .cf strong{margin-left:auto;font-size:12px;font-weight:700}
+.col .empty{border:1.5px dashed var(--line);border-radius:8px;text-align:center;padding:18px 8px}
 
 /* table */
 .tools{display:flex;gap:8px;margin-bottom:10px}
@@ -529,14 +538,23 @@ function vRingkasan() {
   </div>`;
 }
 
+function boardCard(p) {
+  const d = daysLeft(p.deadline);
+  const tone = d === null ? '' : d < 0 ? 'late' : d <= 3 ? 'soon' : '';
+  const done = p.tasks.filter(t => t.done).length;
+  const when = d === null ? '' : d < 0 ? `Telat ${-d} hari` : d === 0 ? 'Hari ini' : d === 1 ? 'Besok' : d <= 3 ? `${d} hari lagi` : new Date(p.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  return `<div class="card ${tone}" draggable="true" data-open="${p.id}" tabindex="0">
+    <b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
+    ${p.tasks.length ? `<div class="prog"><div class="bar2" style="--c:var(--acc)"><span style="width:${done / p.tasks.length * 100}%"></span></div><em>${done}/${p.tasks.length}</em></div>` : ''}
+    <div class="cf">${when ? `<span class="chip ${tone}">${when}</span>` : '<span></span>'}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}<strong>${p.value ? rp(p.value) : ''}</strong></div></div>`;
+}
 function vBoard() {
   const list = visible();
   return `<div class="board">${COLS.map(([k, label, c]) => {
     const items = list.filter(p => p.status === k).sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
-    return `<div class="col" data-col="${k}" style="--c:var(${c})"><h3><i></i>${label}<em>${items.length}</em></h3>${items.map(p =>
-      `<div class="card" draggable="true" data-open="${p.id}" tabindex="0"><b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
-       <div class="meta">${dlChip(p)}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
-       ${p.tasks.length ? `<div class="bar2" style="--c:var(--acc)"><span style="width:${p.tasks.filter(t => t.done).length / p.tasks.length * 100}%"></span></div>` : ''}</div>`).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
+    const sum = items.reduce((a, p) => a + (p.value || 0), 0);
+    return `<div class="col" data-col="${k}" style="--c:var(${c})"><div class="ch"><h3><i></i>${label}<em>${items.length}</em><button type="button" class="x" data-add="${k}" aria-label="Tambah proyek di ${label}">${ic('plus', 16)}</button></h3><small>${sum ? rp(sum) : 'Rp 0'}</small></div>
+      <div class="cl">${items.map(boardCard).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div></div>`;
   }).join('')}</div>`;
 }
 
@@ -582,10 +600,11 @@ $('#side').addEventListener('click', e => {
 $('#menu').onclick = () => $('#side').classList.toggle('open');
 $('#q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
 const vw = $('#view');
-vw.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { view = g.dataset.go; render(); return; } const o = e.target.closest('[data-open]'); if (o) openModal(projects.find(p => p.id === o.dataset.open)); });
+vw.addEventListener('click', e => { const ad = e.target.closest('[data-add]'); if (ad) { openModal(); f.status.value = ad.dataset.add; return; } const g = e.target.closest('[data-go]'); if (g) { view = g.dataset.go; render(); return; } const o = e.target.closest('[data-open]'); if (o) openModal(projects.find(p => p.id === o.dataset.open)); });
 vw.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.closest?.('[data-open]')?.click(); });
 vw.addEventListener('change', e => { if (e.target.id === 'fs') { fs = e.target.value; render(); } });
-vw.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) e.dataTransfer.setData('text/plain', c.dataset.open); });
+vw.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) { e.dataTransfer.setData('text/plain', c.dataset.open); setTimeout(() => c.classList.add('dragging')); } });
+vw.addEventListener('dragend', e => { e.target.closest?.('.card')?.classList.remove('dragging'); document.querySelectorAll('.col.over').forEach(c => c.classList.remove('over')); });
 vw.addEventListener('dragover', e => { const c = e.target.closest('.col'); if (c) { e.preventDefault(); c.classList.add('over'); } });
 vw.addEventListener('dragleave', e => e.target.closest('.col')?.classList.remove('over'));
 vw.addEventListener('drop', async e => {
