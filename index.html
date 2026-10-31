@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meja Kerja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8ebe4;--card:#f8f9f5;--ink:#18222c;--mute:#5f6b73;--line:#cfd5cb;
+  --blue:#2c47e0;--mark:#f3d63d;--red:#c8372d;--green:#2f7a4f;
+  --ide:#8a949b;--brief:#2c47e0;--kerja:#0f8f8f;--revisi:#b8641a;--approval:#7a3fb0;--selesai:#2f7a4f;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#12181e;--card:#1b232b;--ink:#e9eee8;--mute:#98a4ab;--line:#2c3740;
+  --blue:#7d93ff;--mark:#f3d63d;--red:#ff7a6e;--green:#6fcf94;
+  --ide:#8a949b;--brief:#7d93ff;--kerja:#3fc7c7;--revisi:#f0a05a;--approval:#c38cf0;--selesai:#6fcf94;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:'Bricolage Grotesque',Georgia,sans-serif;margin:0;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.top{display:flex;align-items:center;gap:12px;padding:18px 24px 6px;flex-wrap:wrap}
+.top h1{font-size:28px;flex:1}
+.btn{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:8px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+.btn.danger{color:var(--red)}
+.sum{display:flex;gap:28px;padding:10px 24px 18px;flex-wrap:wrap}
+.sum div b{display:block;font:700 26px 'Bricolage Grotesque',sans-serif}
+.sum div span{color:var(--mute);font-size:13px}
+.board{display:flex;gap:14px;padding:0 24px 32px;overflow-x:auto;align-items:flex-start}
+.col{flex:0 0 268px;background:color-mix(in srgb,var(--card) 55%,transparent);border-radius:10px;padding:10px;min-height:140px}
+.col.over{outline:2px dashed var(--blue)}
+.col h3{font-size:16px;display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
+.col h3 i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.col h3 em{margin-left:auto;font-style:normal;color:var(--mute);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab}
+.card:active{cursor:grabbing}
+.card b{display:block;font-weight:600}
+.card small{color:var(--mute)}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:12.5px}
+.chip{padding:1px 8px;border-radius:99px;border:1px solid var(--line)}
+.chip.soon{background:var(--mark);color:#18222c;border-color:var(--mark);font-weight:600}
+.chip.late{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}
+.bar{height:4px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--green)}
+.empty{color:var(--mute);font-size:13px;padding:6px 4px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:min(620px,94vw);padding:0}
+dialog::backdrop{background:rgba(10,14,18,.5)}
+form{padding:20px;display:grid;gap:12px}
+label{display:grid;gap:4px;font-weight:500;font-size:14px}
+input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:70px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sub{border-top:1px solid var(--line);padding-top:12px}
+.sub h3{font-size:16px;margin-bottom:6px}
+.item{display:flex;gap:8px;align-items:center;padding:3px 0}
+.item input[type=checkbox]{width:auto}
+.item .x{margin-left:auto;border:0;background:none;color:var(--mute)}
+.item.done span{text-decoration:line-through;color:var(--mute)}
+.add{display:flex;gap:8px;margin-top:6px}
+.links a{color:var(--blue);display:block;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+#auth{max-width:340px;margin:12vh auto;padding:24px;display:grid;gap:12px}
+.note{background:var(--mark);color:#18222c;padding:6px 24px;font-size:13px}
+@media(max-width:560px){.row{grid-template-columns:1fr}.sum{gap:18px}}
+</style>
+</head>
+<body>
+
+<div id="demo" class="note" hidden>Mode demo: data tersimpan di browser ini saja. Isi SUPABASE_URL dan SUPABASE_KEY di index.html untuk memakai Supabase.</div>
+
+<form id="auth" hidden>
+  <h1>Meja Kerja</h1>
+  <label>Email<input id="em" type="email" required autocomplete="username"></label>
+  <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
+  <button class="btn primary">Masuk</button>
+</form>
+
+<main id="app" hidden>
+  <header class="top">
+    <h1>Meja Kerja</h1>
+    <button class="btn primary" id="new">Proyek baru</button>
+    <button class="btn" id="out" hidden>Keluar</button>
+  </header>
+  <section class="sum" id="sum"></section>
+  <section class="board" id="board"></section>
+</main>
+
+<dialog id="dlg">
+  <form id="f" method="dialog">
+    <h2 id="dt">Proyek</h2>
+    <label>Judul<input name="title" required></label>
+    <div class="row">
+      <label>Klien<input name="client"></label>
+      <label>Tahap<select name="status"></select></label>
+    </div>
+    <div class="row">
+      <label>Deadline<input name="deadline" type="date"></label>
+      <label>Nilai proyek (Rp)<input name="value" type="number" min="0" step="1000"></label>
+    </div>
+    <label>Sudah dibayar (Rp)<input name="paid" type="number" min="0" step="1000"></label>
+    <label>Brief<textarea name="brief"></textarea></label>
+    <label>Link file (satu per baris)<textarea name="links" placeholder="https://..."></textarea></label>
+    <div class="links" id="lk"></div>
+
+    <div class="sub">
+      <h3>Checklist</h3>
+      <div id="tl"></div>
+      <div class="add"><input id="tn" placeholder="Tambah langkah, mis. Sketsa awal"><button type="button" class="btn" id="ta">Tambah</button></div>
+    </div>
+    <div class="sub">
+      <h3>Revisi</h3>
+      <div id="rl"></div>
+      <div class="add"><input id="rn" placeholder="Catatan feedback ronde berikutnya"><button type="button" class="btn" id="ra">Catat revisi</button></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn danger" id="del" hidden>Hapus</button>
+      <button type="button" class="btn" id="cancel">Batal</button>
+      <button class="btn primary" id="save">Simpan</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// ====== Isi dua nilai ini dari Supabase > Project Settings > API ======
+const SUPABASE_URL = '';
+const SUPABASE_KEY = '';
+// =====================================================================
+
+const COLS = [['ide','Ide','--ide'],['brief','Brief','--brief'],['kerja','Dikerjakan','--kerja'],
+  ['revisi','Revisi','--revisi'],['approval','Menunggu approval','--approval'],['selesai','Selesai','--selesai']];
+const $ = s => document.querySelector(s);
+const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => crypto.randomUUID();
+const demo = !SUPABASE_URL;
+const sb = demo ? null : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let projects = [], cur = null;
+
+const persistLocal = () => localStorage.setItem('mk_projects', JSON.stringify(projects));
+const db = {
+  async load() {
+    if (demo) return JSON.parse(localStorage.getItem('mk_projects') || '[]');
+    const { data, error } = await sb.from('projects').select('*').order('created_at', { ascending: false });
+    if (error) throw error; return data;
+  },
+  async save(p) {
+    if (demo) {
+      if (!p.id) p.id = uid();
+      const i = projects.findIndex(x => x.id === p.id);
+      i < 0 ? projects.unshift(p) : projects[i] = p;
+      persistLocal(); return;
+    }
+    const { data, error } = await sb.from('projects').upsert(p).select().single();
+    if (error) throw error;
+    const i = projects.findIndex(x => x.id === data.id);
+    i < 0 ? projects.unshift(data) : projects[i] = data;
+  },
+  async del(id) {
+    if (!demo) { const { error } = await sb.from('projects').delete().eq('id', id); if (error) throw error; }
+    projects = projects.filter(x => x.id !== id);
+    if (demo) persistLocal();
+  }
+};
+
+const daysLeft = d => d ? Math.round((new Date(d) - new Date().setHours(0,0,0,0)) / 864e5) : null;
+const doneRatio = p => p.tasks.length ? p.tasks.filter(t => t.done).length / p.tasks.length : 0;
+
+function renderSummary() {
+  const active = projects.filter(p => p.status !== 'selesai');
+  const soon = active.filter(p => { const d = daysLeft(p.deadline); return d !== null && d <= 7; }).length;
+  const wait = projects.filter(p => p.status === 'approval').length;
+  const owed = projects.filter(p => p.status !== 'ide').reduce((s, p) => s + Math.max(0, p.value - p.paid), 0);
+  $('#sum').innerHTML =
+    `<div><b>${active.length}</b><span>Proyek aktif</span></div>
+     <div><b>${soon}</b><span>Deadline dalam 7 hari</span></div>
+     <div><b>${wait}</b><span>Menunggu approval</span></div>
+     <div><b>${rp(owed)}</b><span>Belum dibayar klien</span></div>`;
+}
+
+function cardHTML(p) {
+  const d = daysLeft(p.deadline);
+  const dl = d === null ? '' : d < 0 ? `<span class="chip late">Telat ${-d} hari</span>`
+    : d <= 3 ? `<span class="chip soon">${d === 0 ? 'Hari ini' : d + ' hari lagi'}</span>`
+    : `<span class="chip">${new Date(p.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>`;
+  const col = COLS.find(c => c[0] === p.status)[2];
+  return `<div class="card" draggable="true" data-id="${p.id}" style="--c:var(${col})" tabindex="0">
+    <b>${esc(p.title)}</b>${p.client ? `<small>${esc(p.client)}</small>` : ''}
+    <div class="meta">${dl}${p.revisions.length ? `<span class="chip">Revisi ${p.revisions.length}</span>` : ''}${p.value ? `<span class="chip">${rp(p.value)}</span>` : ''}</div>
+    ${p.tasks.length ? `<div class="bar"><span style="width:${doneRatio(p) * 100}%"></span></div>` : ''}
+  </div>`;
+}
+
+function render() {
+  renderSummary();
+  $('#board').innerHTML = COLS.map(([k, label, c]) => {
+    const list = projects.filter(p => p.status === k)
+      .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+    return `<div class="col" data-col="${k}" style="--c:var(${c})">
+      <h3><i></i>${label}<em>${list.length}</em></h3>
+      ${list.map(cardHTML).join('') || '<div class="empty">Seret proyek ke sini</div>'}</div>`;
+  }).join('');
+}
+
+// ---- drag & drop ----
+const board = $('#board');
+board.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (c) e.dataTransfer.setData('text/plain', c.dataset.id); });
+board.addEventListener('dragover', e => { const c = e.target.closest('.col'); if (c) { e.preventDefault(); c.classList.add('over'); } });
+board.addEventListener('dragleave', e => e.target.closest('.col')?.classList.remove('over'));
+board.addEventListener('drop', async e => {
+  const col = e.target.closest('.col'); if (!col) return;
+  e.preventDefault();
+  const p = projects.find(x => x.id === e.dataTransfer.getData('text/plain'));
+  if (p && p.status !== col.dataset.col) { try { await db.save({ ...p, status: col.dataset.col }); } catch (err) { alert(err.message); } }
+  render();
+});
+board.addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openModal(projects.find(p => p.id === c.dataset.id)); });
+board.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.closest('.card')?.click(); });
+
+// ---- modal ----
+const dlg = $('#dlg'), f = $('#f');
+f.status.innerHTML = COLS.map(c => `<option value="${c[0]}">${c[1]}</option>`).join('');
+
+function renderSub() {
+  $('#tl').innerHTML = cur.tasks.map((t, i) =>
+    `<div class="item ${t.done ? 'done' : ''}"><input type="checkbox" data-t="${i}" ${t.done ? 'checked' : ''}><span>${esc(t.title)}</span><button type="button" class="x" data-dt="${i}" aria-label="Hapus langkah">✕</button></div>`).join('')
+    || '<div class="empty">Belum ada langkah.</div>';
+  $('#rl').innerHTML = cur.revisions.map(r =>
+    `<div class="item"><b>Ronde ${r.round}</b><span>${esc(r.note)}</span></div>`).join('')
+    || '<div class="empty">Belum ada revisi.</div>';
+  const urls = (f.links.value.match(/https?:\/\/\S+/g) || []);
+  $('#lk').innerHTML = urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join('');
+}
+
+function openModal(p) {
+  cur = structuredClone(p || { title: '', client: '', status: 'ide', deadline: null, value: 0, paid: 0, brief: '', links: '', tasks: [], revisions: [] });
+  $('#dt').textContent = p ? 'Edit proyek' : 'Proyek baru';
+  for (const k of ['title', 'client', 'status', 'deadline', 'value', 'paid', 'brief', 'links']) f[k].value = cur[k] ?? '';
+  $('#del').hidden = !p;
+  renderSub(); dlg.showModal();
+}
+
+$('#new').onclick = () => openModal();
+$('#cancel').onclick = () => dlg.close();
+f.links.addEventListener('input', renderSub);
+$('#ta').onclick = () => { const v = $('#tn').value.trim(); if (v) { cur.tasks.push({ id: uid(), title: v, done: false }); $('#tn').value = ''; renderSub(); } };
+$('#ra').onclick = () => { const v = $('#rn').value.trim(); if (v) { cur.revisions.push({ round: cur.revisions.length + 1, note: v, date: new Date().toISOString() }); $('#rn').value = ''; renderSub(); } };
+dlg.addEventListener('click', e => {
+  if (e.target.dataset.t !== undefined) { cur.tasks[+e.target.dataset.t].done = e.target.checked; renderSub(); }
+  if (e.target.dataset.dt !== undefined) { cur.tasks.splice(+e.target.dataset.dt, 1); renderSub(); }
+});
+$('#tn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#ta').click(); } });
+$('#rn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#ra').click(); } });
+
+f.addEventListener('submit', async e => {
+  e.preventDefault();
+  const p = { ...cur, title: f.title.value.trim(), client: f.client.value.trim(), status: f.status.value,
+    deadline: f.deadline.value || null, value: +f.value.value || 0, paid: +f.paid.value || 0,
+    brief: f.brief.value, links: f.links.value };
+  if (!p.id) delete p.id;
+  try { await db.save(p); dlg.close(); render(); } catch (err) { alert('Gagal menyimpan: ' + err.message); }
+});
+$('#del').onclick = async () => {
+  if (!confirm('Hapus proyek ini? Tindakan ini tidak bisa dibatalkan.')) return;
+  try { await db.del(cur.id); dlg.close(); render(); } catch (err) { alert(err.message); }
+};
+
+// ---- auth & start ----
+async function start() {
+  try { projects = await db.load(); } catch (err) { alert('Gagal memuat data: ' + err.message); }
+  $('#auth').hidden = true; $('#app').hidden = false; $('#out').hidden = demo;
+  render();
+}
+$('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$('#auth').addEventListener('submit', async e => {
+  e.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
+  error ? alert('Login gagal: ' + error.message) : start();
+});
+(async () => {
+  if (demo) { $('#demo').hidden = false; return start(); }
+  const { data } = await sb.auth.getSession();
+  data.session ? start() : $('#auth').hidden = false;
+})();
+</script>
+</body>
+</html>
