@@ -1,4 +1,4 @@
--- Jalankan di Supabase: SQL Editor > New query > Run
+-- Jalankan di SQL Editor layanan database-mu (New query > Run)
 
 create table if not exists public.projects (
   id          uuid primary key default gen_random_uuid(),
@@ -25,4 +25,4 @@ create policy "owner only" on public.projects
   with check (auth.uid() = user_id);
 
 -- Setelah itu: Authentication > Users > Add user (email + password milikmu),
--- lalu matikan "Allow new users to sign up" di Authentication > Providers > Email.
+-- lalu matikan pendaftaran user baru (sign-up) di pengaturan Authentication > Email.

@@ -1,23 +1,16 @@
 # Meja Kerja
 
-Dashboard pribadi untuk mengelola pekerjaan kreatif: board kanban, deadline, checklist, revisi, dan ringkasan pembayaran.
-Vanilla JS satu file + Supabase.
+Dashboard pribadi untuk mengelola pekerjaan kreatif: board kanban, deadline, checklist, revisi, dan rekap keuangan.
+Satu file HTML + vanilla JS. Semua data tersimpan di cloud dan sinkron antar perangkat.
 
-## Menjalankan
+## Setup
 
-1. Buka `index.html` di browser. Tanpa konfigurasi, aplikasi berjalan dalam **mode demo** (data di localStorage).
-2. Untuk memakai Supabase:
-   - Jalankan `schema.sql` di Supabase SQL Editor.
-   - Buat satu user di Authentication > Users, lalu matikan sign-up.
-   - Isi `SUPABASE_URL` dan `SUPABASE_KEY` (anon key) di bagian atas script `index.html`.
+1. Jalankan `schema.sql` di SQL Editor layanan database-mu untuk membuat tabel `projects` beserta RLS.
+2. Buat satu user di Authentication > Users, lalu matikan pendaftaran user baru.
+3. Isi `CLOUD_URL` dan `CLOUD_KEY` (anon key) di bagian atas script `index.html`.
+4. Deploy sebagai situs statis (Vercel, GitHub Pages, dan sejenisnya).
 
 ## Catatan
 
-- Anon key memang dirancang untuk publik. Keamanan data dijaga oleh RLS pada tabel `projects`, jadi pastikan RLS aktif (sudah ada di `schema.sql`). Jangan pernah memasukkan `service_role` key.
+- Anon key memang dirancang untuk publik. Keamanan data dijaga RLS pada tabel `projects`. Jangan pernah memasukkan `service_role` key.
 - Drag & drop tidak berfungsi di layar sentuh. Ubah tahap lewat dropdown di detail proyek.
-
-## Rencana
-
-- Kalender deadline
-- Aset dan moodboard
-- Riwayat pembayaran

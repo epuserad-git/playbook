@@ -153,6 +153,7 @@ textarea{min-height:70px;resize:vertical}
 
 <form id="auth" hidden>
   <h1>Masuk ke Meja Kerja</h1>
+  <p id="cfg" hidden style="color:var(--red);font-size:13px">Penyimpanan cloud belum dikonfigurasi. Isi CLOUD_URL dan CLOUD_KEY di bagian atas script index.html.</p>
   <label>Email<input id="em" type="email" required autocomplete="username"></label>
   <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
   <button class="btn primary" style="justify-content:center">Masuk</button>
@@ -164,7 +165,7 @@ textarea{min-height:70px;resize:vertical}
     <nav class="nav" id="nav"></nav>
     <div class="foot">
       <small id="who"></small>
-      <button id="out" hidden><span data-ic="logout" data-s="16"></span>Keluar</button>
+      <button id="out"><span data-ic="logout" data-s="16"></span>Keluar</button>
     </div>
   </aside>
   <div class="main">
@@ -212,9 +213,9 @@ textarea{min-height:70px;resize:vertical}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-// ====== Isi dua nilai ini dari Supabase > Project Settings > API ======
-const SUPABASE_URL = '';
-const SUPABASE_KEY = '';
+// ====== Isi dua nilai ini dari pengaturan API layanan cloud-mu ======
+const CLOUD_URL = '';
+const CLOUD_KEY = '';
 // =====================================================================
 
 const I = {
@@ -244,33 +245,25 @@ const $ = s => document.querySelector(s);
 const rp = n => 'Rp ' + (+n || 0).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => crypto.randomUUID();
-const demo = !SUPABASE_URL;
-const sb = demo ? null : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const ready = !!(CLOUD_URL && CLOUD_KEY);
+const sb = ready ? supabase.createClient(CLOUD_URL, CLOUD_KEY) : null;
 let projects = [], cur = null, view = 'ringkasan', q = '', fs = '';
 
-const persistLocal = () => localStorage.setItem('mk_projects', JSON.stringify(projects));
 const db = {
   async load() {
-    if (demo) return JSON.parse(localStorage.getItem('mk_projects') || '[]');
     const { data, error } = await sb.from('projects').select('*').order('created_at', { ascending: false });
     if (error) throw error; return data;
   },
   async save(p) {
-    if (demo) {
-      if (!p.id) p.id = uid();
-      const i = projects.findIndex(x => x.id === p.id);
-      i < 0 ? projects.unshift(p) : projects[i] = p;
-      persistLocal(); return;
-    }
     const { data, error } = await sb.from('projects').upsert(p).select().single();
     if (error) throw error;
     const i = projects.findIndex(x => x.id === data.id);
     i < 0 ? projects.unshift(data) : projects[i] = data;
   },
   async del(id) {
-    if (!demo) { const { error } = await sb.from('projects').delete().eq('id', id); if (error) throw error; }
+    const { error } = await sb.from('projects').delete().eq('id', id);
+    if (error) throw error;
     projects = projects.filter(x => x.id !== id);
-    if (demo) persistLocal();
   }
 };
 
@@ -409,22 +402,25 @@ $('#del').onclick = async () => {
 };
 
 // ---- auth & start ----
+async function refresh() { try { projects = await db.load(); render(); } catch (err) { console.error(err); } }
 async function start(email) {
   try { projects = await db.load(); } catch (err) { alert('Gagal memuat data: ' + err.message); }
   $('#auth').hidden = true; $('#app').hidden = false;
-  $('#out').hidden = demo;
-  $('#who').textContent = demo ? 'Mode demo: data tersimpan di browser ini. Isi SUPABASE_URL dan SUPABASE_KEY untuk memakai Supabase.' : email;
+  $('#who').textContent = email;
   paintIcons(); render();
 }
 $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 $('#auth').addEventListener('submit', async e => {
   e.preventDefault();
+  if (!ready) return;
   const { data, error } = await sb.auth.signInWithPassword({ email: $('#em').value, password: $('#pw').value });
   error ? alert('Login gagal: ' + error.message) : start(data.user.email);
 });
+// sinkron antar perangkat: muat ulang data saat tab kembali dibuka
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#app').hidden && !dlg.open) refresh(); });
 (async () => {
   paintIcons();
-  if (demo) return start();
+  if (!ready) { $('#cfg').hidden = false; $('#auth').hidden = false; return; }
   const { data } = await sb.auth.getSession();
   data.session ? start(data.session.user.email) : $('#auth').hidden = false;
 })();
